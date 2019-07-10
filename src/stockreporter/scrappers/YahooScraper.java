@@ -31,7 +31,8 @@ public class YahooScraper extends StockScraper {
     /**
      * default constructor
      */
-    private boolean test = false;
+    //First act of making my new branch is going to be to get rid of this
+    //weird test flag
     private Document document;
     private StockSummary summaryData;
     
@@ -55,10 +56,8 @@ public class YahooScraper extends StockScraper {
         System.out.println("Scrapping: "+stockTicker.getSymbol());
         String url = "https://finance.yahoo.com/quote/"+stockTicker.getSymbol().toLowerCase();
         try {
-            if(!test){
             Connection jsoupConn = Jsoup.connect(url);
             document = jsoupConn.referrer("http://www.google.com") .timeout(1000*20).get();
-            }
 
             StockDateMap stockDateMap = new StockDateMap();
             stockDateMap.setSourceId(dao.getStockSourceIdByName(Constants.SCRAP_DATA_FROM_YAHOO));
@@ -147,6 +146,11 @@ public class YahooScraper extends StockScraper {
             dao.insertStockSummaryData(summaryData);
             
         } catch (IOException ex) {
+            Logger.getLogger(StockReporter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (NullPointerException ex){
+            //Yahoo can and will make a blank page if given the URL of an invalid stock ticker symbol.
+            //This exception will be thrown by the scraper if it tries to scrape a blank page.
             Logger.getLogger(StockReporter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

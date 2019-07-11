@@ -88,13 +88,13 @@ public class YahooScraper extends StockScraper {
                     //Get the plain-text from each td
                     String tdText = td.text();
                     
+                    /* Stuff to refactor the Utility usage
                     //Declare three BigDecimals for a single amount, range minimum, and range maximum
                     BigDecimal tdAmount = Utility.convertStringCurrency("0");
                     BigDecimal tdMin = Utility.convertStringCurrency("0");
                     BigDecimal tdMax = Utility.convertStringCurrency("0");
                     
-                    //Ensure tdText doesn't contain a date
-                    if (!tdText.contains(",")) {
+                    if (!(tdText.contains(","))) {
                         //Check if tdText is a Range (contains a hyphen)
                         if(tdText.contains("-")){
                             //Use Utility.getRangeMinAndMax to break tdText into two Strings
@@ -113,63 +113,89 @@ public class YahooScraper extends StockScraper {
                             tdAmount = Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText);
                         }
                     }
+                    */ 
+                    
+                    String rangeMin;
+                    String rangeMax;
+                    
                     //Case statement for each data field (dataset() stores each attribute minus its HTML5 "data-" prefix
                     //so this switch just uses Map.get("test"))
                     switch(tdData.get("test")){
                         //Cases should hold up regardless of Yahoo table order
                         case "PREV_CLOSE-value" :
-                            summaryData.setPrevClosePrice(tdAmount);
+                            //summaryData.setPrevClosePrice(tdAmount);
+                            summaryData.setPrevClosePrice(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText));
                             break;
                         case "OPEN-value" :
-                            summaryData.setOpenPrice(tdAmount);
+                            //summaryData.setOpenPrice(tdAmount);
+                            summaryData.setOpenPrice(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText));
                             break;
                         case "BID-value" :
-                            summaryData.setBidPrice(tdAmount);
+                            //summaryData.setBidPrice(tdAmount);
+                            summaryData.setBidPrice(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText));
                             break;
                         case "ASK-value" :
-                            summaryData.setAskPrice(tdAmount);
+                            //summaryData.setAskPrice(tdAmount);
+                            summaryData.setAskPrice(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText));
                             break;
                         case "DAYS_RANGE-value" :
-                            summaryData.setDaysRangeMin(tdMin);
-                            summaryData.setDaysRangeMax(tdMax);
+                            //summaryData.setDaysRangeMin(tdMin);
+                            //summaryData.setDaysRangeMax(tdMax);
+                            rangeMin = Utility.getRangeMinAndMax(tdText)[0].trim();
+                            rangeMax = Utility.getRangeMinAndMax(tdText)[1].trim();
+                            summaryData.setDaysRangeMin(Utility.convertStringCurrency(Utility.isBlank(rangeMin)?"0":rangeMin));
+                            summaryData.setDaysRangeMax(Utility.convertStringCurrency(Utility.isBlank(rangeMax)?"0":rangeMax));
                             break;
                         case "FIFTY_TWO_WK_RANGE-value" :
-                            summaryData.setFiftyTwoWeeksMin(tdMin);
-                            summaryData.setFiftyTwoWeeksMax(tdMax);
+                            //summaryData.setFiftyTwoWeeksMin(tdMin);
+                            //summaryData.setFiftyTwoWeeksMax(tdMax);
+                            rangeMin = Utility.getRangeMinAndMax(tdText)[0].trim();
+                            rangeMax = Utility.getRangeMinAndMax(tdText)[1].trim();
+                            summaryData.setFiftyTwoWeeksMin(Utility.convertStringCurrency(Utility.isBlank(rangeMin)?"0":rangeMin));
+                            summaryData.setFiftyTwoWeeksMax(Utility.convertStringCurrency(Utility.isBlank(rangeMax)?"0":rangeMax));
                             break;
                         case "TD_VOLUME-value" :
                             //This uses long instead of BigDecimal
-                            summaryData.setVolume(tdAmount.longValue());
+                            //summaryData.setVolume(tdAmount.longValue());
+                            summaryData.setVolume(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText).longValue());
                             break;
                         case "AVERAGE_VOLUME_3MONTH-value" :
                             //This uses long instead of BigDecimal
-                            summaryData.setAvgVolume(tdAmount.longValue());
+                            //summaryData.setAvgVolume(tdAmount.longValue());
+                            summaryData.setAvgVolume(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText).longValue());
                             break;
                         case "MARKET_CAP-value" :
-                            summaryData.setMarketCap(tdAmount);
+                            //summaryData.setMarketCap(tdAmount);
+                            summaryData.setMarketCap(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText));
                             break;
                         case "BETA_3Y-value" :
-                            summaryData.setBetaCoefficient(tdAmount);
+                            //summaryData.setBetaCoefficient(tdAmount);
+                            summaryData.setBetaCoefficient(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText));
                             break;
                         case "PE_RATIO-value" :
-                            summaryData.setPeRatio(tdAmount);
+                            //summaryData.setPeRatio(tdAmount);
+                            summaryData.setPeRatio(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText));
                             break;
                         case "EPS_RATIO-value" :
-                            summaryData.setEps(tdAmount);
+                            //summaryData.setEps(tdAmount);
+                            summaryData.setEps(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText));
                             break;
                         case "EARNINGS_DATE-value" :
                             //This uses the plaintext tdText, not a converted value
                             summaryData.setEarningDate(tdText);
                             break;
                         case "DIVIDEND_AND_YIELD-value" :
-                            summaryData.setDividentYield(tdAmount);
+                            //summaryData.setDividentYield(tdAmount);
+                            String dividend = Utility.getNumberBeforeParantheses(tdText).trim();
+                            summaryData.setDividentYield(Utility.convertStringCurrency(Utility.isBlank(dividend)?"0":dividend));
                             break;
                         case "EX_DIVIDEND_DATE-value" :
                             //This uses the plaintext tdText, not a converted value
                             summaryData.setExDividentDate(tdText);
                             break;
                         case "ONE_YEAR_TARGET_PRICE-value" :
-                            summaryData.setOneYearTargetEst(tdAmount);
+                            //summaryData.setOneYearTargetEst(tdAmount);
+                            summaryData.setOneYearTargetEst(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText));
                             break;
                         default:
                             break;

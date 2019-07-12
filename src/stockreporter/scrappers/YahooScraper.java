@@ -87,34 +87,7 @@ public class YahooScraper extends StockScraper {
                     Map<String, String> tdData = td.dataset();
                     //Get the plain-text from each td
                     String tdText = td.text();
-                    
-                    /* Stuff to refactor the Utility usage
-                    //Declare three BigDecimals for a single amount, range minimum, and range maximum
-                    BigDecimal tdAmount = Utility.convertStringCurrency("0");
-                    BigDecimal tdMin = Utility.convertStringCurrency("0");
-                    BigDecimal tdMax = Utility.convertStringCurrency("0");
-                    
-                    if (!(tdText.contains(","))) {
-                        //Check if tdText is a Range (contains a hyphen)
-                        if(tdText.contains("-")){
-                            //Use Utility.getRangeMinAndMax to break tdText into two Strings
-                            String rangeMin = Utility.getRangeMinAndMax(tdText)[0].trim();
-                            String rangeMax = Utility.getRangeMinAndMax(tdText)[1].trim();
-                            //Convert those Strings to currency format
-                            tdMin = Utility.convertStringCurrency(Utility.isBlank(rangeMin)?"0":rangeMin);
-                            tdMax = Utility.convertStringCurrency(Utility.isBlank(rangeMax)?"0":rangeMax);
-                        //Else, check if tdText has a parenthesis, and get only the text before it
-                        } else if (tdText.contains("(")){
-                            String dividend = Utility.getNumberBeforeParantheses(tdText).trim();
-                            //Convert that text to currency format
-                            tdAmount = Utility.convertStringCurrency(Utility.isBlank(dividend)?"0":dividend);
-                        //Else it's a normal number and can be converted to currency format
-                        }else {
-                            tdAmount = Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText);
-                        }
-                    }
-                    */ 
-                    
+                    //Declare two Strings for use in getting range min and max (DaysRange and FiftyTwoWeeks)
                     String rangeMin;
                     String rangeMax;
                     
@@ -123,61 +96,49 @@ public class YahooScraper extends StockScraper {
                     switch(tdData.get("test")){
                         //Cases should hold up regardless of Yahoo table order
                         case "PREV_CLOSE-value" :
-                            //summaryData.setPrevClosePrice(tdAmount);
                             summaryData.setPrevClosePrice(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText));
                             break;
                         case "OPEN-value" :
-                            //summaryData.setOpenPrice(tdAmount);
                             summaryData.setOpenPrice(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText));
                             break;
                         case "BID-value" :
-                            //summaryData.setBidPrice(tdAmount);
                             summaryData.setBidPrice(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText));
                             break;
                         case "ASK-value" :
-                            //summaryData.setAskPrice(tdAmount);
                             summaryData.setAskPrice(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText));
                             break;
                         case "DAYS_RANGE-value" :
-                            //summaryData.setDaysRangeMin(tdMin);
-                            //summaryData.setDaysRangeMax(tdMax);
+                            //Break tdText into two halves around the hyphen
                             rangeMin = Utility.getRangeMinAndMax(tdText)[0].trim();
                             rangeMax = Utility.getRangeMinAndMax(tdText)[1].trim();
                             summaryData.setDaysRangeMin(Utility.convertStringCurrency(Utility.isBlank(rangeMin)?"0":rangeMin));
                             summaryData.setDaysRangeMax(Utility.convertStringCurrency(Utility.isBlank(rangeMax)?"0":rangeMax));
                             break;
                         case "FIFTY_TWO_WK_RANGE-value" :
-                            //summaryData.setFiftyTwoWeeksMin(tdMin);
-                            //summaryData.setFiftyTwoWeeksMax(tdMax);
+                            //Break tdText into two halves around the hyphen
                             rangeMin = Utility.getRangeMinAndMax(tdText)[0].trim();
                             rangeMax = Utility.getRangeMinAndMax(tdText)[1].trim();
                             summaryData.setFiftyTwoWeeksMin(Utility.convertStringCurrency(Utility.isBlank(rangeMin)?"0":rangeMin));
                             summaryData.setFiftyTwoWeeksMax(Utility.convertStringCurrency(Utility.isBlank(rangeMax)?"0":rangeMax));
                             break;
                         case "TD_VOLUME-value" :
-                            //This uses long instead of BigDecimal
-                            //summaryData.setVolume(tdAmount.longValue());
+                            //setVolume uses a long-typed argument, so use BigDecimal.longValue()
                             summaryData.setVolume(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText).longValue());
                             break;
                         case "AVERAGE_VOLUME_3MONTH-value" :
-                            //This uses long instead of BigDecimal
-                            //summaryData.setAvgVolume(tdAmount.longValue());
+                            //setAvgVolume uses a long-typed argument, so use BigDecimal.longValue()
                             summaryData.setAvgVolume(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText).longValue());
                             break;
                         case "MARKET_CAP-value" :
-                            //summaryData.setMarketCap(tdAmount);
                             summaryData.setMarketCap(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText));
                             break;
                         case "BETA_3Y-value" :
-                            //summaryData.setBetaCoefficient(tdAmount);
                             summaryData.setBetaCoefficient(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText));
                             break;
                         case "PE_RATIO-value" :
-                            //summaryData.setPeRatio(tdAmount);
                             summaryData.setPeRatio(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText));
                             break;
                         case "EPS_RATIO-value" :
-                            //summaryData.setEps(tdAmount);
                             summaryData.setEps(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText));
                             break;
                         case "EARNINGS_DATE-value" :
@@ -185,7 +146,7 @@ public class YahooScraper extends StockScraper {
                             summaryData.setEarningDate(tdText);
                             break;
                         case "DIVIDEND_AND_YIELD-value" :
-                            //summaryData.setDividentYield(tdAmount);
+                            //Only get the parts of tdText before the parentheses for this field
                             String dividend = Utility.getNumberBeforeParantheses(tdText).trim();
                             summaryData.setDividentYield(Utility.convertStringCurrency(Utility.isBlank(dividend)?"0":dividend));
                             break;
@@ -194,7 +155,6 @@ public class YahooScraper extends StockScraper {
                             summaryData.setExDividentDate(tdText);
                             break;
                         case "ONE_YEAR_TARGET_PRICE-value" :
-                            //summaryData.setOneYearTargetEst(tdAmount);
                             summaryData.setOneYearTargetEst(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText));
                             break;
                         default:

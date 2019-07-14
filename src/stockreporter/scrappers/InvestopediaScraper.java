@@ -6,10 +6,13 @@
 package stockreporter.scrappers;
 
 import java.io.IOException;
+
+import stockreporter.StockDao;
 import stockreporter.daomodels.StockSummary;
 import stockreporter.daomodels.StockTicker;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jsoup.Connection;
@@ -25,7 +28,7 @@ import stockreporter.daomodels.StockDateMap;
 /**
  * Scrap stock financial data from investopedia
  */
-public class InvestopediaScraper extends StockScraper {
+public class InvestopediaScraper implements Scraper {
     
     /**
      * default constructor
@@ -33,14 +36,18 @@ public class InvestopediaScraper extends StockScraper {
     private boolean test = false;
     private Document document;
     private StockSummary summaryData;
-    
-    public InvestopediaScraper(){
-        super();
+    private StockDao dao;
+    private List<StockTicker> stockTickers;
+
+    InvestopediaScraper(){
+        dao = StockDao.getInstance();
+        stockTickers = dao.getAllstockTickers();
     }
     
     /**
      * scrap summary data
      */
+    @Override
     public void scrapeAllSummaryData(){
         for(StockTicker stockTicker: stockTickers)
             scrapeSingleSummaryData(stockTicker);
@@ -48,8 +55,9 @@ public class InvestopediaScraper extends StockScraper {
     
     /**
      * Scrap summary data by stock ticker
-     * @param stockTicker 
+     * @param stockTicker the ticker symbol
      */
+    @Override
     public void scrapeSingleSummaryData(StockTicker stockTicker){        
         System.out.println("Scrapping: "+stockTicker.getSymbol());
         String url = "https://www.investopedia.com/markets/stocks/"+stockTicker.getSymbol().toLowerCase();

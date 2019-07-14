@@ -6,10 +6,13 @@
 package stockreporter.scrappers;
 
 import java.io.IOException;
+
+import stockreporter.StockDao;
 import stockreporter.daomodels.StockSummary;
 import stockreporter.daomodels.StockTicker;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jsoup.Connection;
@@ -26,7 +29,7 @@ import stockreporter.daomodels.StockDateMap;
 /**
  * Scrap Yahoo stock financial data
  */
-public class YahooScraper extends StockScraper {
+public class YahooScraper implements Scraper {
     
     /**
      * default constructor
@@ -34,14 +37,18 @@ public class YahooScraper extends StockScraper {
     private boolean test = false;
     private Document document;
     private StockSummary summaryData;
-    
-    public YahooScraper(){
-        super();
+    private StockDao dao;
+    private List<StockTicker> stockTickers;
+
+    YahooScraper(){
+        dao = StockDao.getInstance();
+        stockTickers = dao.getAllstockTickers();
     }
     
     /**
      * Scrap summary data
      */
+    @Override
     public void scrapeAllSummaryData(){
         for(StockTicker stockTicker: stockTickers)
             scrapeSingleSummaryData(stockTicker);
@@ -49,8 +56,9 @@ public class YahooScraper extends StockScraper {
     
     /**
      * Scrap summary data by stock ticker
-     * @param stockTicker 
+     * @param stockTicker The ticker symbol
      */
+    @Override
     public void scrapeSingleSummaryData(StockTicker stockTicker){     
         System.out.println("Scrapping: "+stockTicker.getSymbol());
         String url = "https://finance.yahoo.com/quote/"+stockTicker.getSymbol().toLowerCase();

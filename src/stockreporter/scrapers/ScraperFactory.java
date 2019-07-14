@@ -1,4 +1,4 @@
-package stockreporter.scrappers;
+package stockreporter.scrapers;
 
 public class ScraperFactory {
     public Scraper getScraper(String scraperType) {

@@ -3,10 +3,8 @@ package stockreporter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import stockreporter.scrappers.InvestopediaScraper;
-import stockreporter.scrappers.Scraper;
-import stockreporter.scrappers.ScraperFactory;
-import stockreporter.scrappers.YahooScraper;
+import stockreporter.scrapers.Scraper;
+import stockreporter.scrapers.ScraperFactory;
 
 /**
  * Main class for scrapping the data

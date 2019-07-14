@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package stockreporter.scrappers;
+package stockreporter.scrapers;
 
 import java.io.IOException;
 
@@ -25,11 +25,10 @@ import stockreporter.StockReporter;
 import stockreporter.Utility;
 import stockreporter.daomodels.StockDateMap;
 
-
 /**
- * Scrap Yahoo stock financial data
+ * Scrap stock financial data from investopedia
  */
-public class YahooScraper implements Scraper {
+public class InvestopediaScraper implements Scraper {
     
     /**
      * default constructor
@@ -40,13 +39,13 @@ public class YahooScraper implements Scraper {
     private StockDao dao;
     private List<StockTicker> stockTickers;
 
-    YahooScraper(){
+    InvestopediaScraper(){
         dao = StockDao.getInstance();
         stockTickers = dao.getAllstockTickers();
     }
     
     /**
-     * Scrap summary data
+     * scrap summary data
      */
     @Override
     public void scrapeAllSummaryData(){
@@ -56,26 +55,25 @@ public class YahooScraper implements Scraper {
     
     /**
      * Scrap summary data by stock ticker
-     * @param stockTicker The ticker symbol
+     * @param stockTicker the ticker symbol
      */
     @Override
-    public void scrapeSingleSummaryData(StockTicker stockTicker){     
+    public void scrapeSingleSummaryData(StockTicker stockTicker){        
         System.out.println("Scrapping: "+stockTicker.getSymbol());
-        String url = "https://finance.yahoo.com/quote/"+stockTicker.getSymbol().toLowerCase();
+        String url = "https://www.investopedia.com/markets/stocks/"+stockTicker.getSymbol().toLowerCase();
         try {
-            if(!test){
+            if (!test){
             Connection jsoupConn = Jsoup.connect(url);
-            document = jsoupConn.referrer("http://www.google.com") .timeout(1000*20).get();
+            document = jsoupConn.referrer("http://www.google.com") .timeout(1000*10).get();
             }
-
             StockDateMap stockDateMap = new StockDateMap();
-            stockDateMap.setSourceId(dao.getStockSourceIdByName(Constants.SCRAP_DATA_FROM_YAHOO));
+            stockDateMap.setSourceId(dao.getStockSourceIdByName(Constants.SCRAP_DATA_FROM_INVESTOPEDIA));
             stockDateMap.setTickerId(stockTicker.getId());
             stockDateMap.setDate(new SimpleDateFormat("MM-dd-yyyy").format(new Date()));
             int last_inserted_id = dao.insertStockDateMap(stockDateMap);
         
-            Element table1 = document.select("table").get(0);
-            Elements rows = table1.select("tr");    
+            Element table2 = document.select("table").get(2);
+            Elements rows = table2.select("tr");    
             summaryData = new StockSummary();
             
             summaryData.setStockDtMapId(last_inserted_id);
@@ -89,18 +87,10 @@ public class YahooScraper implements Scraper {
             summaryData.setOpenPrice(Utility.convertStringCurrency(Utility.isBlank(openPrice)?"0":openPrice));
             rowNum++;
             
-            String bidPrice = rows.get(rowNum).select("td").get(1).text();
-            summaryData.setBidPrice(Utility.convertStringCurrency(Utility.isBlank(bidPrice)?"0":bidPrice));
-            rowNum++;
-            
-            String askPrice = rows.get(rowNum).select("td").get(1).text();
-            summaryData.setAskPrice(Utility.convertStringCurrency(Utility.isBlank(askPrice)?"0":askPrice));
-            rowNum++;
-                       
-            String daysRangeMin = Utility.getRangeMinAndMax(rows.get(rowNum).select("td").get(1).text())[0].trim();
-            summaryData.setDaysRangeMin(Utility.convertStringCurrency(Utility.isBlank(daysRangeMin)?"0":daysRangeMin));
-            String daysRangeMax = Utility.getRangeMinAndMax(rows.get(rowNum).select("td").get(1).text())[1].trim();
-            summaryData.setDaysRangeMax(Utility.convertStringCurrency(Utility.isBlank(daysRangeMax)?"0":daysRangeMax)); 
+            String daysRangeMax = Utility.getRangeMinAndMax(rows.get(rowNum).select("td").get(1).text())[0].trim();
+            summaryData.setDaysRangeMin(Utility.convertStringCurrency(Utility.isBlank(daysRangeMax)?"0":daysRangeMax));            
+            String daysRangeMin = Utility.getRangeMinAndMax(rows.get(rowNum).select("td").get(1).text())[1].trim();
+            summaryData.setDaysRangeMax(Utility.convertStringCurrency(Utility.isBlank(daysRangeMin)?"0":daysRangeMin));
             rowNum++;
                     
             String fiftyTwoWeeksMin = Utility.getRangeMinAndMax(rows.get(rowNum).select("td").get(1).text())[0].trim();
@@ -108,52 +98,34 @@ public class YahooScraper implements Scraper {
             String fiftyTwoWeeksMax = Utility.getRangeMinAndMax(rows.get(rowNum).select("td").get(1).text().trim())[1].trim();
             summaryData.setFiftyTwoWeeksMax(Utility.convertStringCurrency(Utility.isBlank(fiftyTwoWeeksMax)?"0":fiftyTwoWeeksMax));
             rowNum++;
-            
-            String volume = rows.get(rowNum).select("td").get(1).text();
-            summaryData.setVolume(Utility.convertStringCurrency(Utility.isBlank(volume)?"0":volume).longValue());
-            rowNum++;
-            
-            String avgVolume = rows.get(rowNum).select("td").get(1).text();
-            summaryData.setAvgVolume(Utility.convertStringCurrency(Utility.isBlank(avgVolume)?"0":avgVolume).longValue());
-
+                    
+            String peRatio = rows.get(rowNum).select("td").get(1).text();
+            summaryData.setPeRatio(Utility.convertStringCurrency(Utility.isBlank(peRatio)?"0":peRatio));
             
             rowNum=0;
-            Element table2 = document.select("table").get(1);
-            rows = table2.select("tr");    
-            
-            String marketCap = rows.get(rowNum).select("td").get(1).text();
-            summaryData.setMarketCap(Utility.convertStringCurrency(Utility.isBlank(marketCap)?"0":marketCap));
-            rowNum++;
+            Element table3 = document.select("table").get(3);
+            rows = table3.select("tr");    
             
             String betaCoefficient = rows.get(rowNum).select("td").get(1).text();
             summaryData.setBetaCoefficient(Utility.convertStringCurrency(Utility.isBlank(betaCoefficient)?"0":betaCoefficient));
             rowNum++;
             
-            String peRatio = rows.get(rowNum).select("td").get(1).text();
-            summaryData.setPeRatio(Utility.convertStringCurrency(Utility.isBlank(peRatio)?"0":peRatio));
+            String volume = rows.get(rowNum).select("td").get(1).text();
+            summaryData.setVolume(Utility.convertStringCurrency(Utility.isBlank(volume)?"0":volume).longValue());
+            rowNum++;
+            
+            String dividend = Utility.getNumeratorAndDenominator(rows.get(rowNum).select("td").get(1).text())[0].trim();
+            summaryData.setDividentYield(Utility.convertStringCurrency(Utility.isBlank(dividend)?"0":dividend));
+            rowNum++;
+            
+            String marketCap = rows.get(rowNum).select("td").get(1).text();
+            summaryData.setMarketCap(Utility.convertStringCurrency(Utility.isBlank(marketCap)?"0":marketCap));
             rowNum++;
             
             String eps = rows.get(rowNum).select("td").get(1).text();
             summaryData.setEps(Utility.convertStringCurrency(Utility.isBlank(eps)?"0":eps));
-            rowNum++;
-            
-            String earningDate = rows.get(rowNum).select("td").get(1).text();
-            summaryData.setEarningDate(earningDate);
-            rowNum++;
-            
-            String dividend = Utility.getNumberBeforeParantheses(rows.get(rowNum).select("td").get(1).text()).trim();
-            summaryData.setDividentYield(Utility.convertStringCurrency(Utility.isBlank(dividend)?"0":dividend));
-            rowNum++;
-            
-            String exDividendDate = rows.get(rowNum).select("td").get(1).text();
-            summaryData.setExDividentDate(exDividendDate);
-            rowNum++;
-            
-            String onYearTargetEst = rows.get(rowNum).select("td").get(1).text();
-            summaryData.setOneYearTargetEst(Utility.convertStringCurrency(Utility.isBlank(onYearTargetEst)?"0":onYearTargetEst));
             
             dao.insertStockSummaryData(summaryData);
-            
         } catch (IOException ex) {
             Logger.getLogger(StockReporter.class.getName()).log(Level.SEVERE, null, ex);
         }

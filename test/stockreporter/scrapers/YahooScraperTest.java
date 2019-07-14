@@ -1,24 +1,38 @@
-package stockreporter.scrappers;
+    
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package stockreporter.scrapers;
 
 import java.io.File;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import java.lang.reflect.Field;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import stockreporter.StockDao;
-import java.lang.reflect.*;
 import stockreporter.Utility;
-import stockreporter.daomodels.StockSummary;
 import stockreporter.daomodels.StockTicker;
+import stockreporter.daomodels.StockSummary;
 
-public class InvestopediaScraperTest {
-
-    StockDao dao;
-    StockTicker test = new StockTicker();
-    StockSummary master = new StockSummary();
+/**
+ *
+ * @author klacayo
+ */
+public class YahooScraperTest {
+    private StockDao dao;
     
-    public InvestopediaScraperTest() {
-        try {
+    private StockTicker stockTicker = new StockTicker();
+    private StockSummary master = new StockSummary();
+    
+    
+    public YahooScraperTest() {
+    
+    
+    
+    try {
             File tempFile = File.createTempFile("dbTest", "sqlite");
             tempFile.deleteOnExit();
             String tempUrl = "jdbc:sqlite:" + tempFile.getAbsolutePath();
@@ -39,58 +53,68 @@ public class InvestopediaScraperTest {
             dao.getInstance();
             dao.deleteAll();
             
-            test.setId(1);
-            test.setName("Apple Inc.");
-            test.setSymbol("AAPL");
+            stockTicker.setId(1);
+            stockTicker.setName("Apple Inc.");
+            stockTicker.setSymbol("AAPL");
             
             master.setPrevClosePrice(Utility.convertStringCurrency("195.35"));
-            master.setBetaCoefficient(Utility.convertStringCurrency("1.247"));
-            master.setDaysRangeMax(Utility.convertStringCurrency("196.37"));
-            master.setDaysRangeMin(Utility.convertStringCurrency("193.14"));
+            master.setBetaCoefficient(Utility.convertStringCurrency("0.99"));
+            master.setDaysRangeMax(Utility.convertStringCurrency("196.36"));
+            master.setDaysRangeMin(Utility.convertStringCurrency("194.71"));
             master.setDividentYield(Utility.convertStringCurrency("2.92/1.49%"));
-            master.setEps(Utility.convertStringCurrency("12.16"));
+            master.setEps(Utility.convertStringCurrency("12.12"));
             master.setFiftyTwoWeeksMax(Utility.convertStringCurrency("233.47"));
             master.setFiftyTwoWeeksMin(Utility.convertStringCurrency("142.00"));
-            master.setMarketCap(Utility.convertStringCurrency("934.08B"));
+            master.setMarketCap(Utility.convertStringCurrency("922.733B"));
             master.setOpenPrice(Utility.convertStringCurrency("194.79"));
-            master.setPeRatio(Utility.convertStringCurrency("16.09"));
+            master.setPeRatio(Utility.convertStringCurrency("16.14"));
             master.setSummaryId(0);
-            master.setVolume(Utility.convertStringCurrency("19,105,393.00").longValue());
+            master.setVolume(Utility.convertStringCurrency("18,747,318.00").longValue());
+            master.setBidPrice(Utility.convertStringCurrency("195.43"));
+            master.setAskPrice(Utility.convertStringCurrency("195.56"));
+            master.setAvgVolume(30598950);
+            master.setEarningDate("Apr 30, 2019");
+            master.setExDividentDate("2019-02-08");
+            master.setOneYearTargetEst(Utility.convertStringCurrency("190.94"));
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+   
 
+    /**
+     * Test of scapeSingleSummaryData method, of class YahooScraper.
+     */
     @Test
-    public void testScrapeSingleSummaryData() {
-        try{
-            File input = new File("Apr_4_2019_AAPL_Investopedia.html");
+    public void testScapeSingleSummaryData() {
+                try{
+            File input = new File("Apr_4_2019_AAPL_Yahoo.html");
             Document tmpDocument = Jsoup.parse(input, "UTF-8", "");
             
-            InvestopediaScraper is = new InvestopediaScraper();
-            Class isClass = is.getClass();
+            YahooScraper ys = new YahooScraper();
+            Class isClass = ys.getClass();
 
             Field f1 = isClass.getDeclaredField("test");
             f1.setAccessible(true);
-            f1.set(is, true);
+            f1.set(ys, true);
             
             Field f2 = isClass.getDeclaredField("document");
             f2.setAccessible(true);
-            f2.set(is, tmpDocument);
+            f2.set(ys, tmpDocument);
             
-            is.scrapeSingleSummaryData(test);
+            ys.scrapeSingleSummaryData(stockTicker);
             
             Field f3 = isClass.getDeclaredField("summaryData");
             f3.setAccessible(true);
-            StockSummary results = (StockSummary)f3.get(is);
+            StockSummary results = (StockSummary)f3.get(ys);
             //This isn't scraped so don't care about the vaule since it is a DB thing.
             master.setStockDtMapId(results.getStockDtMapId());
             
             String expected = master.toString();
             String actual = results.toString();
             System.out.println("Expected:" + expected);
-            System.out.println("Actual:" + actual);
+            System.out.println("Actual:  " + actual);
             
             assertEquals(expected, actual);
             
@@ -102,7 +126,8 @@ public class InvestopediaScraperTest {
             e.printStackTrace();
         }
         
-
     }
+    
+    
     
 }

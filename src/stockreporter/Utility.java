@@ -34,7 +34,7 @@ public class Utility {
     }
     
     /**
-     * Get thousands by B/M
+     * Get thousands by Millions/Billions/Trillions
      * @param letter
      * @return 
      */

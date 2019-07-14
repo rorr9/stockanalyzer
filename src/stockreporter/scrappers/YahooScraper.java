@@ -130,13 +130,7 @@ public class YahooScraper extends StockScraper {
                             summaryData.setAvgVolume(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText).longValue());
                             break;
                         case "MARKET_CAP-value" :
-                            //Yahoo Market Cap listings will convert trillions to "[number]T"
-                            BigDecimal convertedTDText = Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText);
-                            //If a T is present in the text, multiply the connverted value by 1,000,000,000,000
-                            if(tdText.contains("T")){
-                                convertedTDText = convertedTDText.multiply(new BigDecimal(1000000000000L));
-                            }
-                            summaryData.setMarketCap(convertedTDText);
+                            summaryData.setMarketCap(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText));
                             break;
                         case "BETA_3Y-value" :
                             summaryData.setBetaCoefficient(Utility.convertStringCurrency(Utility.isBlank(tdText)?"0":tdText));

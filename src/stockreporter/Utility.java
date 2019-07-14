@@ -43,6 +43,8 @@ public class Utility {
             return 1000;
         else if (letter == 'B')
             return 1000000;
+        else if (letter == 'T')
+            return 1000000000;
         return 1;
     }
     

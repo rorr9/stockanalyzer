@@ -21,14 +21,10 @@ import stockreporter.Utility;
 import stockreporter.daomodels.StockDateMap;
 
 /**
- * Scrap stock financial data from investopedia
+ * Scrap stock financial data from Investopedia
  */
 public class InvestopediaScraper extends StockScraper {
     
-    /**
-     * default constructor
-     */
-    private boolean test = false;
     private Document document;
     private StockSummary summaryData;
     
@@ -49,20 +45,18 @@ public class InvestopediaScraper extends StockScraper {
      * @param stockTicker 
      */
     public void scrapeSingleSummaryData(StockTicker stockTicker){        
-        System.out.println("Scrapping: "+stockTicker.getSymbol());
+        System.out.println("Scraping: "+stockTicker.getSymbol());
         String url = "https://www.investopedia.com/markets/stocks/"+stockTicker.getSymbol().toLowerCase();
         try {
-            if (!test){
             Connection jsoupConn = Jsoup.connect(url);
             document = jsoupConn.referrer("http://www.google.com") .timeout(1000*10).get();
-            }
             StockDateMap stockDateMap = new StockDateMap();
             stockDateMap.setSourceId(dao.getStockSourceIdByName(Constants.SCRAP_DATA_FROM_INVESTOPEDIA));
             stockDateMap.setTickerId(stockTicker.getId());
             stockDateMap.setDate(new SimpleDateFormat("MM-dd-yyyy").format(new Date()));
             int last_inserted_id = dao.insertStockDateMap(stockDateMap);
         
-            Element table2 = document.select("table").get(2);
+            /*Element table2 = document.select("table").get(2);
             Elements rows = table2.select("tr");    
             summaryData = new StockSummary();
             
@@ -114,6 +108,10 @@ public class InvestopediaScraper extends StockScraper {
             
             String eps = rows.get(rowNum).select("td").get(1).text();
             summaryData.setEps(Utility.convertStringCurrency(Utility.isBlank(eps)?"0":eps));
+            */
+            
+            Elements investopediaTRs = document.select("tr");
+            
             
             dao.insertStockSummaryData(summaryData);
         } catch (IOException ex) {

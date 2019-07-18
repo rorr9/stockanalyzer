@@ -1,4 +1,4 @@
-package stockreporter.scrappers;
+package stockreporter.scrapers;
 
 import stockreporter.daomodels.StockTicker;
 

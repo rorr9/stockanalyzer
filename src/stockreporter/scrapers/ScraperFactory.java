@@ -1,6 +1,7 @@
 package stockreporter.scrapers;
 
 public class ScraperFactory {
+
     public Scraper getScraper(String scraperType) {
         if (scraperType == null) {
             return null;
@@ -12,6 +13,10 @@ public class ScraperFactory {
 
         if (scraperType.equalsIgnoreCase("YAHOO")) {
             return new YahooScraper();
+        }
+
+        if (scraperType.equalsIgnoreCase("MARKETWATCH")) {
+            return new MarketWatchScraper();
         }
 
         return null;

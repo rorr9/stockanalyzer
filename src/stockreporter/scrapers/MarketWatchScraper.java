@@ -36,7 +36,8 @@ public class MarketWatchScraper implements Scraper {
 
     //Default constructor
     public MarketWatchScraper() {
-        super();
+        dao = StockDao.getInstance();
+        stockTickers = dao.getAllstockTickers();
     }
 
     public void scrapeAllSummaryData() {

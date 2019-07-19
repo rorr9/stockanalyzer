@@ -96,13 +96,18 @@ public class Command {
         logger.log(Level.INFO, "Get database instance");
         StockDao dao = StockDao.getInstance();
         logger.log(Level.INFO, "Create scraper instances");
+
         Scraper investopediaScraper = scraperFactory.getScraper("INVESTOPEDIA");
         Scraper yahooScraper = scraperFactory.getScraper("YAHOO");
+        Scraper marketWatchScraper = scraperFactory.getScraper("MARKETWATCH");
+
         StockTicker ticker = StockDao.getInstance().getStockTickerByID(tickerID);
         logger.log(Level.INFO, "Scrap single summary data for Yahoo...");
         yahooScraper.scrapeSingleSummaryData(ticker);
         logger.log(Level.INFO, "Scrap single summary data for Investopedia...");
         investopediaScraper.scrapeSingleSummaryData(ticker);
+        logger.log(Level.INFO, "Scrap single summary data for MarketWatch...");
+        //marketWatchScraper.scrapeSingleSummaryData(ticker);
 
     }
 
@@ -121,10 +126,14 @@ public class Command {
         logger.log(Level.INFO, "Create scraper instances");
         Scraper investopediaScraper = scraperFactory.getScraper("INVESTOPEDIA");
         Scraper yahooScraper = scraperFactory.getScraper("YAHOO");
+        Scraper marketWatchScraper = scraperFactory.getScraper("MARKETWATCH");
+
         logger.log(Level.INFO, "Scrap summary data for Yahoo...");
         yahooScraper.scrapeAllSummaryData();
         logger.log(Level.INFO, "Scrap summary data for Investopedia...");
         investopediaScraper.scrapeAllSummaryData();
+        logger.log(Level.INFO, "Scrap single summary data for MarketWatch...");
+        //marketWatchScraper.scrapeAllSummaryData();
 
     }
 }

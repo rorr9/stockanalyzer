@@ -2,6 +2,9 @@ package stockreporter;
 
 import stockreporter.daomodels.StockSummary;
 import stockreporter.daomodels.StockTicker;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -10,9 +13,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.DriverManager;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
 import stockreporter.daomodels.StockDateMap;
 
 /**
@@ -30,98 +37,56 @@ public final class StockDao {
 
     //For testing change the name to something like "stockreporter.test"
     // and drop the database after testing
-    private String dbName = "stockreporter.prod";
-    private String url = "jdbc:sqlite:stockreporter.prod";
+    private String dbName = "stockreporter.test";
+    private String url = "jdbc:sqlite:stockreporter.test";
+    private String BASE_SQL_FILE_PATH = "./resources/";
+
+    private Collection<String> tableNames = Arrays.asList(
+            Constants.TABLE_STOCK_TICKER,
+            Constants.TABLE_STOCK_DATE_MAP,
+            Constants.TABLE_STOCK_SOURCE,
+            Constants.TABLE_STOCK_SUMMARY
+    );
 
     /**
      * Default constructor to check if database exist otherwise create new
      * database with tables, views and indexes
      */
     public StockDao() {
-        if (!databaseAlreadyInitialized()) {
-            ArrayList<String> sqlStrings = new ArrayList<>();
-            //Create the tables
-            String stockTicker = "CREATE TABLE IF NOT EXISTS STOCK_TICKER (\n"
-                    + "	TICKER_ID INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-                    + "	SYMBOL TEXT NOT NULL UNIQUE,\n"
-                    + "	NAME TEXT NOT NULL UNIQUE\n"
-                    + ");";
-
-            sqlStrings.add(stockTicker);
-
-            String stockSource = "CREATE TABLE IF NOT EXISTS STOCK_SOURCE (\n"
-                    + "	SOURCE_ID INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-                    + "	NAME TEXT NOT NULL UNIQUE\n"
-                    + ");";
-
-            sqlStrings.add(stockSource);
-
-            String stockDateMap = "CREATE TABLE IF NOT EXISTS STOCK_DATE_MAP (\n"
-                    + "	STOCK_DT_MAP_ID INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-                    + "	STOCK_DATE TEXT,\n"
-                    + "	TICKER_ID INTEGER REFERENCES STOCK_TICKET(TICKET_ID),\n"
-                    + "	SOURCE_ID INTEGER REFERENCES STOCK_SOURCE(SOURCE_ID)\n"
-                    + ");";
-
-            sqlStrings.add(stockDateMap);
-
-            String stockSummary = "CREATE TABLE IF NOT EXISTS STOCK_SUMMARY (\n"
-                    + "	SUMMARY_ID INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-                    + "	PREV_CLOSE_PRICE REAL,\n"
-                    + "	OPEN_PRICE REAL,\n"
-                    + "	BID_PRICE REAL,\n"
-                    + "	ASK_PRICE REAL,\n"
-                    + "	DAYS_RANGE_MIN REAL,\n"
-                    + "	DAYS_RANGE_MAX REAL,\n"
-                    + "	FIFTY_TWO_WEEKS_MIN REAL,\n"
-                    + "	FIFTY_TWO_WEEKS_MAX REAL,\n"
-                    + "	VOLUME INTEGER,\n"
-                    + "	AVG_VOLUME INTEGER,\n"
-                    + "	MARKET_CAP REAL,\n"
-                    + "	BETA_COEFFICIENT REAL,\n"
-                    + "	PE_RATIO REAL,\n"
-                    + "	EPS REAL,\n"
-                    + "	EARNING_DATE TEXT,\n"
-                    + "	DIVIDEND_YIELD REAL,\n"
-                    + "	EX_DIVIDEND_DATE TEXT,\n"
-                    + "	ONE_YEAR_TARGET_EST REAL,\n"
-                    + "	STOCK_DT_MAP_ID INTEGER REFERENCES STOCK_DATE_MAP(STOCK_DT_MAP_ID)\n"
-                    + ");";
-
-            sqlStrings.add(stockSummary);
-
-            //Placeholder for the StockHistorical string.
-            //Creating the index
-            String index = "CREATE INDEX STOCK_DATE_IDX ON STOCK_DATE_MAP(STOCK_DATE);";
-
-            sqlStrings.add(index);
-
-            //Creating the View strings
-            String stockSummaryView = "CREATE VIEW STOCK_SUMMARY_VIEW AS\n"
-                    + " SELECT SDM.STOCK_DATE STK_DATE, ST.SYMBOL STOCK, AVG(SS.PREV_CLOSE_PRICE) AVG_PRICE FROM STOCK_SUMMARY SS\n"
-                    + " INNER JOIN STOCK_DATE_MAP SDM ON SS.STOCK_DT_MAP_ID = SDM.STOCK_DT_MAP_ID\n"
-                    + " INNER JOIN STOCK_TICKER ST ON ST.TICKER_ID = SDM.TICKER_ID\n"
-                    + " GROUP BY SDM.STOCK_DATE, ST.SYMBOL";
-
-            sqlStrings.add(stockSummaryView);
-
-            //Placeholder for stockhistorical view
-            //Execute the SQL strings in the DB.
-            logger.log(Level.INFO, "Creating database and DDL statements...");
-            try {
-                connect();
-                stmt = conn.createStatement();
-                for (String str : sqlStrings) {
-                    stmt.execute(str);
-                }
-            } catch (SQLException e) {
-                logger.log(Level.SEVERE, e.getMessage());
-            } finally {
-                disconnect();
-            }
-            insertAllStockSources();
-            insertAllTickers();
+        if (databaseAlreadyInitialized()) {
+            return;
         }
+
+        Collection<String> sqlFileNames = Arrays.asList(
+                "create_table_stock_ticker.sql",
+                "create_table_stock_source.sql",
+                "create_table_stock_date_map.sql",
+                "create_table_stock_summary.sql",
+                "create_index_stock_date.sql",
+                "create_view_stock_summary.sql"
+        );
+
+        List<String> sqlStrings = sqlFileNames.stream()
+                .map(fileName -> this.getScript(this.BASE_SQL_FILE_PATH + fileName))
+                .collect(Collectors.toList());
+
+        logger.log(Level.INFO, "Creating database and DDL statements...");
+
+        try {
+            connect();
+            stmt = conn.createStatement();
+            for (String str : sqlStrings) {
+                stmt.execute(str);
+//                conn.commit();
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, e.getMessage());
+        } finally {
+            disconnect();
+        }
+
+        insertAllStockSources();
+        insertAllTickers();
     }
 
     /**
@@ -170,6 +135,7 @@ public final class StockDao {
     public boolean databaseAlreadyInitialized() {
         logger.log(Level.INFO, "Check database already initialized...");
         String tableName = null;
+
         try {
             connect();
             DatabaseMetaData meta = conn.getMetaData();
@@ -183,6 +149,7 @@ public final class StockDao {
         } finally {
             disconnect();
         }
+
         return tableName != null;
     }
 
@@ -213,10 +180,9 @@ public final class StockDao {
     public void setStockTickerData(String stockSymbol, String stockName) {
         logger.log(Level.INFO, "Insert STOCK_TICKER data...");
 
-        String sql = "INSERT INTO STOCK_TICKER (SYMBOL, NAME) VALUES (?, ?);";
         try {
             connect();
-            pstmt = conn.prepareStatement(sql);
+            pstmt = conn.prepareStatement("INSERT INTO STOCK_TICKER (SYMBOL, NAME) VALUES (?, ?);");
             pstmt.setString(1, stockSymbol);
             pstmt.setString(2, stockName);
             pstmt.executeUpdate();
@@ -237,10 +203,10 @@ public final class StockDao {
     public List<StockTicker> getAllstockTickers() {
         logger.log(Level.INFO, "Get all STOCK_TICKER data...");
         List<StockTicker> stockTickers = new ArrayList<>();
-        String query = "SELECT SYMBOL, NAME FROM STOCK_TICKER";
+
         try {
             connect();
-            pstmt = conn.prepareStatement(query);
+            pstmt = conn.prepareStatement("SELECT SYMBOL, NAME FROM STOCK_TICKER");
             rs = pstmt.executeQuery();
             StockTicker stockticker = null;
 
@@ -251,6 +217,7 @@ public final class StockDao {
                 stockticker.setSymbol(rs.getString("symbol"));
                 stockTickers.add(stockticker);
             }
+
             rs.close();
             pstmt.close();
         } catch (SQLException e) {
@@ -258,6 +225,7 @@ public final class StockDao {
         } finally {
             disconnect();
         }
+
         return stockTickers;
     }
 
@@ -268,10 +236,10 @@ public final class StockDao {
      */
     public void setStockSource(String stockSource) {
         logger.log(Level.INFO, "Insert STOCK_SOURCE data...");
-        String sql = "INSERT INTO STOCK_SOURCE (NAME) VALUES (?);";
+
         try {
             connect();
-            pstmt = conn.prepareStatement(sql);
+            pstmt = conn.prepareStatement("INSERT INTO STOCK_SOURCE (NAME) VALUES (?);");
             pstmt.setString(1, stockSource);
             pstmt.executeUpdate();
             conn.commit();
@@ -317,6 +285,7 @@ public final class StockDao {
                 disconnect();
             }
         }
+
         return last_inserted_id;
     }
 
@@ -329,6 +298,7 @@ public final class StockDao {
     public int getStockTickerBySymbol(String symbol) {
         String symbolQuery = "SELECT TICKER_ID FROM STOCK_TICKER WHERE SYMBOL = ?";
         int tickerID = 0;
+
         try {
             connect();
             pstmt = conn.prepareStatement(symbolQuery);
@@ -349,9 +319,9 @@ public final class StockDao {
                     logger.log(Level.SEVERE, ex.getLocalizedMessage());
                 }
             }
-
             disconnect();
         }
+
         return tickerID;
     }
 
@@ -387,9 +357,9 @@ public final class StockDao {
                     logger.log(Level.SEVERE, ex.getLocalizedMessage());
                 }
             }
-
             disconnect();
         }
+
         return tickerID;
     }
 
@@ -399,29 +369,7 @@ public final class StockDao {
      * @return
      */
     public int getStockDateMapCount() {
-        String SQL = "SELECT COUNT(*) as CNT FROM STOCK_DATE_MAP";
-        int recCount = 0;
-        try {
-            connect();
-            pstmt = conn.prepareStatement(SQL);
-            rs = pstmt.executeQuery();
-            recCount = rs.getInt("CNT");
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, e.getMessage());
-        } finally {
-            if (pstmt != null) {
-                try {
-                    pstmt.close();
-                    if (rs != null) {
-                        rs.close();
-                    }
-                } catch (SQLException ex) {
-                    logger.log(Level.SEVERE, ex.getLocalizedMessage());
-                }
-            }
-            disconnect();
-        }
-        return recCount;
+        return this.getTableCount(Constants.TABLE_STOCK_DATE_MAP);
     }
 
     /**
@@ -430,29 +378,7 @@ public final class StockDao {
      * @return
      */
     public int getStockSummaryCount() {
-        String SQL = "SELECT COUNT(*) as CNT FROM STOCK_SUMMARY";
-        int recCount = 0;
-        try {
-            connect();
-            pstmt = conn.prepareStatement(SQL);
-            rs = pstmt.executeQuery();
-            recCount = rs.getInt("CNT");
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, e.getMessage());
-        } finally {
-            if (pstmt != null) {
-                try {
-                    pstmt.close();
-                    if (rs != null) {
-                        rs.close();
-                    }
-                } catch (SQLException ex) {
-                    logger.log(Level.SEVERE, ex.getLocalizedMessage());
-                }
-            }
-            disconnect();
-        }
-        return recCount;
+        return this.getTableCount(Constants.TABLE_STOCK_SUMMARY);
     }
 
     /**
@@ -461,29 +387,7 @@ public final class StockDao {
      * @return
      */
     public int getStockSourceCount() {
-        String SQL = "SELECT COUNT(*) as CNT FROM STOCK_SOURCE";
-        int recCount = 0;
-        try {
-            connect();
-            pstmt = conn.prepareStatement(SQL);
-            rs = pstmt.executeQuery();
-            recCount = rs.getInt("CNT");
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, e.getMessage());
-        } finally {
-            if (pstmt != null) {
-                try {
-                    pstmt.close();
-                    if (rs != null) {
-                        rs.close();
-                    }
-                } catch (SQLException ex) {
-                    logger.log(Level.SEVERE, ex.getLocalizedMessage());
-                }
-            }
-            disconnect();
-        }
-        return recCount;
+        return this.getTableCount(Constants.TABLE_STOCK_SOURCE);
     }
 
     /**
@@ -492,29 +396,7 @@ public final class StockDao {
      * @return
      */
     public int getStockTickerCount() {
-        String SQL = "SELECT COUNT(*) as CNT FROM STOCK_TICKER";
-        int recCount = 0;
-        try {
-            connect();
-            pstmt = conn.prepareStatement(SQL);
-            rs = pstmt.executeQuery();
-            recCount = rs.getInt("CNT");
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, e.getMessage());
-        } finally {
-            if (pstmt != null) {
-                try {
-                    pstmt.close();
-                    if (rs != null) {
-                        rs.close();
-                    }
-                } catch (SQLException ex) {
-                    logger.log(Level.SEVERE, ex.getLocalizedMessage());
-                }
-            }
-            disconnect();
-        }
-        return recCount;
+        return this.getTableCount(Constants.TABLE_STOCK_TICKER);
     }
 
     /**
@@ -545,7 +427,6 @@ public final class StockDao {
             if (pstmt != null) {
                 try {
                     pstmt.close();
-
                     if (rs != null) {
                         rs.close();
                     }
@@ -555,6 +436,7 @@ public final class StockDao {
             }
             disconnect();
         }
+
         return stockDateMapID;
     }
 
@@ -577,6 +459,7 @@ public final class StockDao {
         if (tickerID > 0 && sourceID > 0) {
             stockDateMapID = getStockDateMapId(date, tickerID, sourceID);
         }
+
         return stockDateMapID;
     }
 
@@ -646,11 +529,10 @@ public final class StockDao {
         logger.log(Level.INFO, "Get STOCK_SUMMARY_VIEW data...");
         int totalRecords = 0;
 
-        String sql = "SELECT * FROM STOCK_SUMMARY_VIEW;";
         connect();
         try (
                 Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery(sql)) {
+                ResultSet rs = stmt.executeQuery("SELECT * FROM STOCK_SUMMARY_VIEW;")) {
             logger.log(Level.INFO, "getAvgStockSummaryView results...");
             while (rs.next()) {
                 logger.log(Level.INFO, rs.getString("STK_DATE") + "\t"
@@ -664,6 +546,7 @@ public final class StockDao {
         } finally {
             disconnect();
         }
+
         return totalRecords;
     }
 
@@ -671,61 +554,82 @@ public final class StockDao {
      * Delete data
      */
     public void deleteAll() {
-        deleteFromStockSource();
-        deleteFromStockTicker();
-        deleteFromStockDateMap();
-        deleteFromStockSummary();
+        this.tableNames.forEach(tableName -> this.deleteFromTable(tableName));
     }
 
     /**
      * Delete data from stock_source
      */
     void deleteFromStockSource() {
-        logger.log(Level.INFO, "Delete data from STOCK_SOURCE...");
-
-        String sql = "DELETE FROM " + Constants.TABLE_STOCK_SOURCE;
-        try {
-            connect();
-            stmt = conn.createStatement();
-            stmt.executeQuery(sql);
-            stmt.close();
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, e.getMessage());
-        } finally {
-            disconnect();
-        }
+        this.deleteFromTable(Constants.TABLE_STOCK_SOURCE);
     }
 
     /**
      * Delete data from stock_ticker
      */
     void deleteFromStockTicker() {
-        logger.log(Level.INFO, "Delete data from STOCK_TICKER...");
-
-        String sql = "DELETE FROM " + Constants.TABLE_STOCK_TICKER;
-        try {
-            connect();
-            stmt = conn.createStatement();
-            stmt.executeQuery(sql);
-            stmt.close();
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, e.getMessage());
-        } finally {
-            disconnect();
-        }
+        this.deleteFromTable(Constants.TABLE_STOCK_TICKER);
     }
 
     /**
      * Delete data from stock_ticker
      */
     void deleteFromStockDateMap() {
-        logger.log(Level.INFO, "Delete data from STOCK_DATE_MAP...");
+        this.deleteFromTable(Constants.TABLE_STOCK_DATE_MAP);
+    }
 
-        String sql = "DELETE FROM " + Constants.TABLE_STOCK_DATE_MAP;
+    /**
+     * Delete data from stock_ticker
+     */
+    void deleteFromStockSummary() {
+        this.deleteFromTable(Constants.TABLE_STOCK_SUMMARY);
+    }
+
+    /**
+     * Helper method for retrieving the count of records in a table.
+     *
+     * @param tableName - the name of the table to retrieve the count from
+     * @return
+     */
+    private int getTableCount(String tableName) {
+        int recCount = 0;
+
+        try {
+            connect();
+            pstmt = conn.prepareStatement("SELECT COUNT(*) as CNT FROM " + tableName);
+            rs = pstmt.executeQuery();
+            recCount = rs.getInt("CNT");
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, e.getMessage());
+        } finally {
+            if (pstmt != null) {
+                try {
+                    pstmt.close();
+                    if (rs != null) {
+                        rs.close();
+                    }
+                } catch (SQLException ex) {
+                    logger.log(Level.SEVERE, ex.getLocalizedMessage());
+                }
+            }
+            disconnect();
+        }
+
+        return recCount;
+    }
+
+    /**
+     * Helper method for deleting the contents of a table.
+     *
+     * @param tableName - the name of the table to delete data from
+     */
+    private void deleteFromTable(String tableName) {
+        logger.log(Level.INFO, "Delete data from {0}...", tableName);
+
         try {
             connect();
             stmt = conn.createStatement();
-            stmt.executeQuery(sql);
+            stmt.executeQuery("DELETE FROM " + tableName);
             stmt.close();
         } catch (SQLException e) {
             logger.log(Level.SEVERE, e.getMessage());
@@ -734,23 +638,22 @@ public final class StockDao {
         }
     }
 
-    /**
-     * Delete data from stock_ticker
-     */
-    void deleteFromStockSummary() {
-        logger.log(Level.INFO, "Delete data from STOCK_SUMMARY...");
+    private String getScript(String filePath) {
+        StringBuffer sqlString = new StringBuffer();
 
-        String sql = "DELETE FROM " + Constants.TABLE_STOCK_SUMMARY;
         try {
-            connect();
-            stmt = conn.createStatement();
-            stmt.executeQuery(sql);
-            stmt.close();
-        } catch (SQLException e) {
+            FileReader fileReader = new FileReader(filePath);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            String str;
+            while ((str = bufferedReader.readLine()) != null) {
+                sqlString.append(str + "\n ");
+            }
+            bufferedReader.close();
+        } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage());
-        } finally {
-            disconnect();
         }
+
+        return sqlString.toString();
     }
 
     /**

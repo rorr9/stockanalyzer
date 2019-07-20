@@ -2,7 +2,6 @@ package stockreporter;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import stockreporter.scrapers.Scraper;
 import stockreporter.scrapers.ScraperFactory;
 
@@ -22,12 +21,16 @@ public class StockReporter {
         logger.log(Level.INFO, "Create scraper instances");
         Scraper investopediaScraper = scraperFactory.getScraper("INVESTOPEDIA");
         Scraper yahooScraper = scraperFactory.getScraper("YAHOO");
-
+        Scraper fidelityScraper = scraperFactory.getScraper("FIDELITY");
+        
         logger.log(Level.INFO, "Scrap summary data for Yahoo...");
         yahooScraper.scrapeAllSummaryData();
         
         logger.log(Level.INFO, "Scrap summary data for Investopedia...");
         investopediaScraper.scrapeAllSummaryData();
+        
+        logger.log(Level.INFO, "Scrap summary data for Fidelity...");
+        fidelityScraper.scrapeAllSummaryData();
         
     }
 }

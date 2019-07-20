@@ -13,6 +13,10 @@ public class ScraperFactory {
         if (scraperType.equalsIgnoreCase("YAHOO")) {
             return new YahooScraper();
         }
+        
+        if (scraperType.equalsIgnoreCase("FIDELITY")) {
+        	return new FidelityScraper();
+        }
 
         return null;
     }

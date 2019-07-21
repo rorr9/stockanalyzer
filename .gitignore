@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .project
 .classpath
 out/
@@ -6,3 +7,7 @@ stockreporter.prod
 stockreporter.test
 .idea/
 /bin/
+=======
+/nbproject/private/
+/build/
+>>>>>>> YahooScraper_MM

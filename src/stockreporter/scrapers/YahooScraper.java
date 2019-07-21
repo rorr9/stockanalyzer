@@ -29,7 +29,7 @@ import stockreporter.daomodels.StockDateMap;
 /**
  * Scrap Yahoo stock financial data
  */
-public class YahooScraper implements Scraper {
+public class YahooScraper extends StockScraper {
     
     /**
      * default constructor
@@ -37,12 +37,9 @@ public class YahooScraper implements Scraper {
     private boolean test = false;
     private Document document;
     private StockSummary summaryData;
-    private StockDao dao;
-    private List<StockTicker> stockTickers;
-
-    YahooScraper(){
-        dao = StockDao.getInstance();
-        stockTickers = dao.getAllstockTickers();
+    
+    public YahooScraper(){
+        super();
     }
     
     /**

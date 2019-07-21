@@ -1,4 +1,7 @@
+.project
+.classpath
 out/
 stockanalyzer.iml
 stockreporter.prod
 .idea/
+/bin/

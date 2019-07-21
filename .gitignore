@@ -3,5 +3,6 @@
 out/
 stockanalyzer.iml
 stockreporter.prod
+stockreporter.test
 .idea/
 /bin/

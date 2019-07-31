@@ -39,7 +39,13 @@ public class MarketWatchScraper implements Scraper {
         dao = StockDao.getInstance();
         stockTickers = dao.getAllstockTickers();
     }
+       @Override
+    public StockSummary getStockSummay() {
+        return summaryData; 
+     
+    }
 
+    @Override
     public void scrapeAllSummaryData() {
         for (StockTicker stockTicker : stockTickers) {
             scrapeSingleSummaryData(stockTicker);

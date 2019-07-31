@@ -46,6 +46,10 @@ public class FidelityScraper extends StockScraper {
         for(StockTicker stockTicker: stockTickers)
             scrapeSingleSummaryData(stockTicker);
     }
+
+    public StockSummary getSummaryData() {
+        return summaryData;
+    }
     
     /**
      * Scrap summary data by stock ticker

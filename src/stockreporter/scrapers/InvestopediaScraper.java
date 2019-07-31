@@ -37,6 +37,10 @@ public class InvestopediaScraper extends StockScraper {
     public InvestopediaScraper(){
         super();
     }
+
+    public StockSummary getSummaryData() {
+        return summaryData;
+    }
     
     /**
      * scrap summary data

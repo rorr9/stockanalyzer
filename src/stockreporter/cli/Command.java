@@ -4,6 +4,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import stockreporter.StockDao;
 import stockreporter.StockReporter;
+import stockreporter.daomodels.StockSummary;
 import stockreporter.daomodels.StockTicker;
 import stockreporter.scrapers.Scraper;
 import stockreporter.scrapers.ScraperFactory;
@@ -110,7 +111,11 @@ public class Command {
         logger.log(Level.INFO, "Scrap single summary data for MarketWatch...");
         //marketWatchScraper.scrapeSingleSummaryData(ticker);
         logger.log(Level.INFO, "Scrap single summary data for Fidelity...");
-        fidelityScraper.scrapeAllSummaryData();
+        fidelityScraper.scrapeSingleSummaryData(ticker);
+
+        printSummary("Yahoo", symbol, yahooScraper.getSummaryData());
+        printSummary("Investopedia", symbol, investopediaScraper.getSummaryData());
+        printSummary("Fidelity", symbol, fidelityScraper.getSummaryData());
 
     }
 
@@ -140,6 +145,13 @@ public class Command {
         //marketWatchScraper.scrapeAllSummaryData();
         logger.log(Level.INFO, "Scrap single summary data for Fidelity...");
         fidelityScraper.scrapeAllSummaryData();
+
+    }
+
+    public static void printSummary(String source, String symbol, StockSummary summary) {
+
+        System.out.println("--------------------------------------------------------------");
+        System.out.println("[" + symbol + "] (from " + source + ") Prev. Close Price: " + summary.getPrevClosePrice() + " Open Price: " + summary.getOpenPrice() + "  Bid Price: " + summary.getBidPrice() + " Ask Price: " + summary.getAskPrice() + " Dividend Yield: " + summary.getDividentYield() + " 52 Week Min: " + summary.getFiftyTwoWeeksMin() + " 52 Week Max: " + summary.getFiftyTwoWeeksMax() + " Volume: " + summary.getVolume());
 
     }
 }

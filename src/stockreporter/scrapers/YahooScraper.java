@@ -10,6 +10,7 @@ import stockreporter.daomodels.StockSummary;
 import stockreporter.daomodels.StockTicker;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,15 +36,18 @@ import stockreporter.daomodels.StockDateMap;
  * list of required stock data, and stores their plaintext contents in the
  * matching StockSummary parameter.
  */
-public class YahooScraper extends StockScraper {
+public class YahooScraper implements Scraper {
 
-    //Top-level object references
     private Document document;
     private StockSummary summaryData;
+    private StockDao dao;
+    private List<StockTicker> stockTickers;
 
+    //Top-level object references
     //Default Constructor, will be refactored after ScraperFactory is implemented
     public YahooScraper() {
-        super();
+        dao = StockDao.getInstance();
+        stockTickers = dao.getAllstockTickers();
     }
 
     /**
@@ -62,8 +66,7 @@ public class YahooScraper extends StockScraper {
      * data by stock ticker @param stockTicker The ticker symbol ======= Scrape
      * summary data by stock tick
      *
-     * er
-     * @param stockTicker >>>>>>>
+     * er @param stockTicker >>>>>>>
      * YahooScraper_MM:src/stockreporter/scrappers/YahooScraper.java
      */
     @Override
@@ -181,5 +184,9 @@ public class YahooScraper extends StockScraper {
             //This exception will be thrown by the scraper if it tries to scrape a blank page
             Logger.getLogger(StockReporter.class.getName()).log(Level.SEVERE, "Empty Page Found for given symbol: " + stockTicker.getSymbol(), ex);
         }
+    }
+
+    public StockSummary getSummaryData() {
+        return summaryData;
     }
 }

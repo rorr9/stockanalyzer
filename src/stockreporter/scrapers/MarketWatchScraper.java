@@ -26,11 +26,13 @@ import stockreporter.daomodels.StockSummary;
 import stockreporter.daomodels.StockTicker;
 
 //Scraps MarketWatch Financial data
-public class MarketWatchScraper extends StockScraper {
+public class MarketWatchScraper implements Scraper {
 
     private boolean test = false;
     private Document document;
     private StockSummary summaryData;
+    private StockDao dao;
+    private List<StockTicker> stockTickers;
 
     //Default constructor
     public MarketWatchScraper() {
@@ -38,10 +40,6 @@ public class MarketWatchScraper extends StockScraper {
         stockTickers = dao.getAllstockTickers();
     }
 
-    public StockSummary getSummaryData() {
-        return summaryData;
-    }
-    
     @Override
     public void scrapeAllSummaryData() {
         for (StockTicker stockTicker : stockTickers) {
@@ -156,6 +154,10 @@ public class MarketWatchScraper extends StockScraper {
         } catch (ParseException ex) {
             Logger.getLogger(MarketWatchScraper.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    public StockSummary getSummaryData() {
+        return summaryData;
     }
 
 }

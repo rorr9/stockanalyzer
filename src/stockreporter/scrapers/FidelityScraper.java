@@ -10,6 +10,7 @@ import stockreporter.daomodels.StockSummary;
 import stockreporter.daomodels.StockTicker;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jsoup.Connection;
@@ -18,51 +19,54 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import stockreporter.Constants;
+import stockreporter.StockDao;
 import stockreporter.StockReporter;
 import stockreporter.Utility;
 import stockreporter.daomodels.StockDateMap;
+
 /**
  *
  * @author craigscheiderer
  */
-public class FidelityScraper extends StockScraper {
-    
-     /**
+public class FidelityScraper implements Scraper {
+
+    /**
      * default constructor
      */
-    private boolean test = false;
     private Document document;
     private StockSummary summaryData;
-    
-    public FidelityScraper(){
-        super();
+    private StockDao dao;
+    private List<StockTicker> stockTickers;
+    private boolean test = false;
+
+    public FidelityScraper() {
+        dao = StockDao.getInstance();
+        stockTickers = dao.getAllstockTickers();
     }
-    
+
     /**
      * Scrap summary data
      */
     @Override
-    public void scrapeAllSummaryData(){
-        for(StockTicker stockTicker: stockTickers)
+    public void scrapeAllSummaryData() {
+        for (StockTicker stockTicker : stockTickers) {
             scrapeSingleSummaryData(stockTicker);
+        }
     }
 
-    public StockSummary getSummaryData() {
-        return summaryData;
-    }
-    
     /**
      * Scrap summary data by stock ticker
-     * @param stockTicker 
+     *
+     * @param stockTicker
      */
     @Override
-    public void scrapeSingleSummaryData(StockTicker stockTicker){     
-        System.out.println("Scraping: "+stockTicker.getSymbol());
-        String url = "https://eresearch.fidelity.com/eresearch/goto/evaluate/snapshot.jhtml?symbols="+stockTicker.getSymbol().toLowerCase();
+    public void scrapeSingleSummaryData(StockTicker stockTicker) {
+        System.out.println("Scraping: " + stockTicker.getSymbol());
+        String url = "https://eresearch.fidelity.com/eresearch/goto/evaluate/snapshot.jhtml?symbols=" + stockTicker.getSymbol().toLowerCase();
         try {
-            if(!test){
-            Connection jsoupConn = Jsoup.connect(url);
-            document = jsoupConn.referrer("http://www.google.com") .timeout(1000*20).get();
+            if (!test) {
+                Connection jsoupConn = Jsoup.connect(url);
+                document = jsoupConn.referrer("http://www.google.com").timeout(1000 * 20).get();
             }
 
             StockDateMap stockDateMap = new StockDateMap();
@@ -70,81 +74,85 @@ public class FidelityScraper extends StockScraper {
             stockDateMap.setTickerId(stockTicker.getId());
             stockDateMap.setDate(new SimpleDateFormat("MM-dd-yyyy").format(new Date()));
             int last_inserted_id = dao.insertStockDateMap(stockDateMap);
-        
+
             Element table1 = document.select("table").get(2);
-            Elements rows = table1.select("tr");    
+            Elements rows = table1.select("tr");
             summaryData = new StockSummary();
-            
+
             summaryData.setStockDtMapId(last_inserted_id);
-            
+
             String bidPrice = rows.get(0).select("td").get(0).text();
-            summaryData.setBidPrice(Utility.convertStringCurrency(Utility.isBlank(bidPrice)?"0":bidPrice));
-            
+            summaryData.setBidPrice(Utility.convertStringCurrency(Utility.isBlank(bidPrice) ? "0" : bidPrice));
+
             String askPrice = rows.get(2).select("td").get(0).text();
-            summaryData.setAskPrice(Utility.convertStringCurrency(Utility.isBlank(askPrice)?"0":askPrice));
-            
+            summaryData.setAskPrice(Utility.convertStringCurrency(Utility.isBlank(askPrice) ? "0" : askPrice));
+
             String openPrice = rows.get(4).select("td").get(0).text();
-            summaryData.setOpenPrice(Utility.convertStringCurrency(Utility.isBlank(openPrice)?"0":openPrice));
-            
+            summaryData.setOpenPrice(Utility.convertStringCurrency(Utility.isBlank(openPrice) ? "0" : openPrice));
+
             String daysRangeMax = rows.get(5).select("td").get(0).text();
-            summaryData.setDaysRangeMax(Utility.convertStringCurrency(Utility.isBlank(daysRangeMax)?"0":daysRangeMax)); 
-            
+            summaryData.setDaysRangeMax(Utility.convertStringCurrency(Utility.isBlank(daysRangeMax) ? "0" : daysRangeMax));
+
             String daysRangeMin = rows.get(6).select("td").get(0).text();
-            summaryData.setDaysRangeMin(Utility.convertStringCurrency(Utility.isBlank(daysRangeMin)?"0":daysRangeMin));
-            
+            summaryData.setDaysRangeMin(Utility.convertStringCurrency(Utility.isBlank(daysRangeMin) ? "0" : daysRangeMin));
+
             String prevClosePrice = rows.get(7).select("td").get(0).text();
-            summaryData.setPrevClosePrice(Utility.convertStringCurrency(Utility.isBlank(prevClosePrice)?"0":prevClosePrice));
-              
+            summaryData.setPrevClosePrice(Utility.convertStringCurrency(Utility.isBlank(prevClosePrice) ? "0" : prevClosePrice));
+
             String fiftyTwoWeeksMax = rows.get(8).select("td").get(0).text();
-            summaryData.setFiftyTwoWeeksMax(Utility.convertStringCurrency(Utility.isBlank(fiftyTwoWeeksMax)?"0":fiftyTwoWeeksMax));
-                    
+            summaryData.setFiftyTwoWeeksMax(Utility.convertStringCurrency(Utility.isBlank(fiftyTwoWeeksMax) ? "0" : fiftyTwoWeeksMax));
+
             String fiftyTwoWeeksMin = rows.get(9).select("td").get(0).text();
-            summaryData.setFiftyTwoWeeksMin(Utility.convertStringCurrency(Utility.isBlank(fiftyTwoWeeksMin)?"0":fiftyTwoWeeksMin));
-            
+            summaryData.setFiftyTwoWeeksMin(Utility.convertStringCurrency(Utility.isBlank(fiftyTwoWeeksMin) ? "0" : fiftyTwoWeeksMin));
+
             String volume = rows.get(9).select("td").get(0).text();
-            summaryData.setVolume(Utility.convertStringCurrency(Utility.isBlank(volume)?"0":volume).longValue());
-            
+            summaryData.setVolume(Utility.convertStringCurrency(Utility.isBlank(volume) ? "0" : volume).longValue());
+
             String avgVolume = rows.get(10).select("td").get(0).text().substring(1, 6);
-            summaryData.setAvgVolume(Utility.convertStringCurrency(Utility.isBlank(avgVolume)?"0":avgVolume).longValue());
+            summaryData.setAvgVolume(Utility.convertStringCurrency(Utility.isBlank(avgVolume) ? "0" : avgVolume).longValue());
 
             Element table2 = document.select("table").get(19);
-            rows = table2.select("tr");    
-            
+            rows = table2.select("tr");
+
             String marketCap = rows.get(1).select("td").get(0).text();
-            String marketCapFormatted = marketCap.substring(1, marketCap.length()-1);
-            summaryData.setMarketCap(Utility.convertStringCurrency(Utility.isBlank(marketCapFormatted)?"0":marketCapFormatted));
-            
+            String marketCapFormatted = marketCap.substring(1, marketCap.length() - 1);
+            summaryData.setMarketCap(Utility.convertStringCurrency(Utility.isBlank(marketCapFormatted) ? "0" : marketCapFormatted));
+
             String betaCoefficient = rows.get(3).select("td").get(0).text();
-            summaryData.setBetaCoefficient(Utility.convertStringCurrency(Utility.isBlank(betaCoefficient)?"0":betaCoefficient));
-            
+            summaryData.setBetaCoefficient(Utility.convertStringCurrency(Utility.isBlank(betaCoefficient) ? "0" : betaCoefficient));
+
             String eps = rows.get(4).select("td").get(0).text().substring(1);
-            summaryData.setEps(Utility.convertStringCurrency(Utility.isBlank(eps)?"0":eps));
-            
+            summaryData.setEps(Utility.convertStringCurrency(Utility.isBlank(eps) ? "0" : eps));
+
             String peRatio = rows.get(7).select("td").get(0).text();
-            
+
             if (peRatio.matches("[^0-9]+$")) {
-                 peRatio = "0";
+                peRatio = "0";
             }
-            
-            summaryData.setPeRatio(Utility.convertStringCurrency(Utility.isBlank(peRatio)?"0":peRatio));
-            
+
+            summaryData.setPeRatio(Utility.convertStringCurrency(Utility.isBlank(peRatio) ? "0" : peRatio));
+
             String exDividendDate = rows.get(8).select("th").get(0).text().substring(27);
             summaryData.setExDividentDate(exDividendDate);
-            
+
             String dividend = rows.get(8).select("td").get(0).text();
             if (dividend.matches("[^0-9]+$")) {
                 dividend = "0";
             }
-            summaryData.setDividentYield(Utility.convertStringCurrency(Utility.isBlank(dividend)?"0":dividend));
-            
+            summaryData.setDividentYield(Utility.convertStringCurrency(Utility.isBlank(dividend) ? "0" : dividend));
+
             String earningDate = null;//Fidelity does not provide this data on their website
-          
+
             String onYearTargetEst = null;//Fidelity does not provide this data on their website
-           
+
             dao.insertStockSummaryData(summaryData);
-            
+
         } catch (IOException ex) {
             Logger.getLogger(StockReporter.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    public StockSummary getSummaryData() {
+        return summaryData;
     }
 }

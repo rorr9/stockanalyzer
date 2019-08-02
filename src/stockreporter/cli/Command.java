@@ -97,7 +97,7 @@ public class Command {
         StockDao dao = StockDao.getInstance();
         logger.log(Level.INFO, "Create scraper instances");
 
-        Scraper investopediaScraper = scraperFactory.getScraper("INVESTOPEDIA");
+        //Scraper investopediaScraper = scraperFactory.getScraper("INVESTOPEDIA");
         Scraper yahooScraper = scraperFactory.getScraper("YAHOO");
         Scraper marketWatchScraper = scraperFactory.getScraper("MARKETWATCH");
         Scraper fidelityScraper = scraperFactory.getScraper("FIDELITY");
@@ -105,13 +105,12 @@ public class Command {
         StockTicker ticker = StockDao.getInstance().getStockTickerByID(tickerID);
         logger.log(Level.INFO, "Scrap single summary data for Yahoo...");
         yahooScraper.scrapeSingleSummaryData(ticker);
-        logger.log(Level.INFO, "Scrap single summary data for Investopedia...");
-        investopediaScraper.scrapeSingleSummaryData(ticker);
+        //logger.log(Level.INFO, "Scrap single summary data for Investopedia...");
+        //investopediaScraper.scrapeSingleSummaryData(ticker);
         logger.log(Level.INFO, "Scrap single summary data for MarketWatch...");
-        //marketWatchScraper.scrapeSingleSummaryData(ticker);
+        marketWatchScraper.scrapeSingleSummaryData(ticker);
         logger.log(Level.INFO, "Scrap single summary data for Fidelity...");
         fidelityScraper.scrapeAllSummaryData();
-
     }
 
     public static void getHistorical(String symbol) {
@@ -127,7 +126,7 @@ public class Command {
         logger.log(Level.INFO, "Get database instance");
         StockDao dao = StockDao.getInstance();
         logger.log(Level.INFO, "Create scraper instances");
-        Scraper investopediaScraper = scraperFactory.getScraper("INVESTOPEDIA");
+        //Scraper investopediaScraper = scraperFactory.getScraper("INVESTOPEDIA");
         Scraper yahooScraper = scraperFactory.getScraper("YAHOO");
         Scraper marketWatchScraper = scraperFactory.getScraper("MARKETWATCH");
         Scraper fidelityScraper = scraperFactory.getScraper("FIDELITY");
@@ -135,9 +134,9 @@ public class Command {
         logger.log(Level.INFO, "Scrap summary data for Yahoo...");
         yahooScraper.scrapeAllSummaryData();
         logger.log(Level.INFO, "Scrap summary data for Investopedia...");
-        investopediaScraper.scrapeAllSummaryData();
+        //investopediaScraper.scrapeAllSummaryData();
         logger.log(Level.INFO, "Scrap single summary data for MarketWatch...");
-        //marketWatchScraper.scrapeAllSummaryData();
+        marketWatchScraper.scrapeAllSummaryData();
         logger.log(Level.INFO, "Scrap single summary data for Fidelity...");
         fidelityScraper.scrapeAllSummaryData();
 

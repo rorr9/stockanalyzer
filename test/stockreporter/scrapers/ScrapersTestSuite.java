@@ -17,7 +17,11 @@ import org.junit.runners.Suite;
  * @author Jared Smith
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({stockreporter.scrapers.InvestopediaScraperTest.class, stockreporter.scrapers.YahooScraperTest.class})
+//Investopedia Tests commented out 8/2/19 after Investopedia changed its website layout
+@Suite.SuiteClasses({/*stockreporter.scrapers.InvestopediaScraperTest.class,
+                     stockreporter.scrapers.InvestopediaScraperLiveDataTest.class, */
+                     stockreporter.scrapers.YahooScraperTest.class,
+                     stockreporter.scrapers.YahooScraperLiveDataTest.class})
 public class ScrapersTestSuite {
 
     @BeforeClass

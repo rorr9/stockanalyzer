@@ -1,3 +1,8 @@
+/*
+ * AS OF 8/2/19 INVESTOPEDIA'S LAYOUT HAS CHANGED
+ * DO NOT USE THIS TEST.  IT HAS BEEN COMMENTED OUT
+ * OF THE TEST SUITE.
+ */
 package stockreporter.scrapers;
 
 import java.io.File;

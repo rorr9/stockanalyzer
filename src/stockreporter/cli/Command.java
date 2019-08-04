@@ -65,7 +65,7 @@ public class Command {
     }
 
     public static void printHelp() {
-        System.out.println("                 Stock Analyzier Command Line Interface                             ");
+        System.out.println("                 Stock Analyzer Command Line Interface                             ");
         System.out.println("------------------------------------------------------------------------------------");
         System.out.println("Command     Parameters                       Description                            ");
         System.out.println("add         [symbol] [\"description\"]       adds a stock ticker to the database    ");

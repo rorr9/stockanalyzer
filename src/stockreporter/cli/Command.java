@@ -16,6 +16,8 @@ import stockreporter.scrapers.ScraperFactory;
  */
 public class Command {
 
+    public static final boolean USE_INVESTOPEDIA_SCRAPER = false, USE_MARKETWATCH_SCRAPER = true, USE_YAHOO_SCRAPER = true, USE_FIDELITY_SCRAPER = true;
+
     private static final Logger logger = Logger.getLogger(StockReporter.class.getName());
 
     public static void parseParams(String[] params) {
@@ -96,26 +98,34 @@ public class Command {
         //create scrapers
         logger.log(Level.INFO, "Get database instance");
         StockDao dao = StockDao.getInstance();
-        logger.log(Level.INFO, "Create scraper instances");
-
-        Scraper investopediaScraper = scraperFactory.getScraper("INVESTOPEDIA");
-        Scraper yahooScraper = scraperFactory.getScraper("YAHOO");
-        Scraper marketWatchScraper = scraperFactory.getScraper("MARKETWATCH");
-        Scraper fidelityScraper = scraperFactory.getScraper("FIDELITY");
 
         StockTicker ticker = StockDao.getInstance().getStockTickerByID(tickerID);
-        logger.log(Level.INFO, "Scrap single summary data for Yahoo...");
-        yahooScraper.scrapeSingleSummaryData(ticker);
-        logger.log(Level.INFO, "Scrap single summary data for Investopedia...");
-        investopediaScraper.scrapeSingleSummaryData(ticker);
-        logger.log(Level.INFO, "Scrap single summary data for MarketWatch...");
-        //marketWatchScraper.scrapeSingleSummaryData(ticker);
-        logger.log(Level.INFO, "Scrap single summary data for Fidelity...");
-        fidelityScraper.scrapeSingleSummaryData(ticker);
 
-        printSummary("Yahoo", symbol, yahooScraper.getSummaryData());
-        printSummary("Investopedia", symbol, investopediaScraper.getSummaryData());
-        printSummary("Fidelity", symbol, fidelityScraper.getSummaryData());
+        if (USE_INVESTOPEDIA_SCRAPER) {
+
+            Scraper investopediaScraper = scraperFactory.getScraper("INVESTOPEDIA");
+            logger.log(Level.INFO, "Scrap single summary data for Investopedia...");
+            investopediaScraper.scrapeSingleSummaryData(ticker);
+            printSummary("Investopedia", symbol, investopediaScraper.getSummaryData());
+        }
+        if (USE_YAHOO_SCRAPER) {
+            Scraper yahooScraper = scraperFactory.getScraper("YAHOO");
+            logger.log(Level.INFO, "Scrap single summary data for Yahoo...");
+            yahooScraper.scrapeSingleSummaryData(ticker);
+            printSummary("Yahoo", symbol, yahooScraper.getSummaryData());
+        }
+        if (USE_MARKETWATCH_SCRAPER) {
+            Scraper marketWatchScraper = scraperFactory.getScraper("MARKETWATCH");
+            logger.log(Level.INFO, "Scrap single summary data for MarketWatch...");
+            marketWatchScraper.scrapeSingleSummaryData(ticker);
+            printSummary("MarketWatch", symbol, marketWatchScraper.getSummaryData());
+        }
+        if (USE_FIDELITY_SCRAPER) {
+            Scraper fidelityScraper = scraperFactory.getScraper("FIDELITY");
+            logger.log(Level.INFO, "Scrap single summary data for Fidelity...");
+            fidelityScraper.scrapeSingleSummaryData(ticker);
+            printSummary("Fidelity", symbol, fidelityScraper.getSummaryData());
+        }
 
     }
 
@@ -131,21 +141,32 @@ public class Command {
         ScraperFactory scraperFactory = new ScraperFactory();
         logger.log(Level.INFO, "Get database instance");
         StockDao dao = StockDao.getInstance();
-        logger.log(Level.INFO, "Create scraper instances");
-        Scraper investopediaScraper = scraperFactory.getScraper("INVESTOPEDIA");
-        Scraper yahooScraper = scraperFactory.getScraper("YAHOO");
-        Scraper marketWatchScraper = scraperFactory.getScraper("MARKETWATCH");
-        Scraper fidelityScraper = scraperFactory.getScraper("FIDELITY");
 
-        logger.log(Level.INFO, "Scrap summary data for Yahoo...");
-        yahooScraper.scrapeAllSummaryData();
-        logger.log(Level.INFO, "Scrap summary data for Investopedia...");
-        investopediaScraper.scrapeAllSummaryData();
-        logger.log(Level.INFO, "Scrap single summary data for MarketWatch...");
-        //marketWatchScraper.scrapeAllSummaryData();
-        logger.log(Level.INFO, "Scrap single summary data for Fidelity...");
-        fidelityScraper.scrapeAllSummaryData();
+        if (USE_INVESTOPEDIA_SCRAPER) {
 
+            Scraper investopediaScraper = scraperFactory.getScraper("INVESTOPEDIA");
+            logger.log(Level.INFO, "Scrap summary data for Investopedia...");
+            investopediaScraper.scrapeAllSummaryData();
+
+        }
+        if (USE_YAHOO_SCRAPER) {
+            Scraper yahooScraper = scraperFactory.getScraper("YAHOO");
+            logger.log(Level.INFO, "Scrap summary data for Yahoo...");
+            yahooScraper.scrapeAllSummaryData();
+
+        }
+        if (USE_MARKETWATCH_SCRAPER) {
+            Scraper marketWatchScraper = scraperFactory.getScraper("MARKETWATCH");
+            logger.log(Level.INFO, "Scrap summary data for MarketWatch...");
+            marketWatchScraper.scrapeAllSummaryData();
+
+        }
+        if (USE_FIDELITY_SCRAPER) {
+            Scraper fidelityScraper = scraperFactory.getScraper("FIDELITY");
+            logger.log(Level.INFO, "Scrap summary data for Fidelity...");
+            fidelityScraper.scrapeAllSummaryData();
+
+        }
     }
 
     public static void printSummary(String source, String symbol, StockSummary summary) {

@@ -67,26 +67,13 @@ public class MarketWatchScraper implements Scraper {
 
 // Elements marketWatchdiv=document.select("div.element.element--list");
             Elements list = document.select("ul.list.list--kv.list--col50 li");
-            String openPrice = list.select("li.kv__item:nth-of-type(1) > .kv__primary.kv__value").text();
-            System.out.println(openPrice);
-
+            String openPrice = list.select("li.kv__item:nth-of-type(1) > .kv__primary.kv__value").text().substring(1).trim();
+            summaryData.setOpenPrice(Utility.convertStringCurrency(Utility.isBlank(openPrice) ? "0" : openPrice));
+            
 //Getting closing stock price
             Elements row = document.select("table.table--primary.align--right tr");
-            String closingPrice = row.select(".u-semi.table__cell").text();
-
-//Converting string closing stock price to double value
-            NumberFormat format = NumberFormat.getCurrencyInstance();
-            Number number = format.parse(closingPrice);
-            double dValueOfClosingPrice = number.doubleValue();
-
-//Getting the stock change
-            Elements row1 = document.select("table.table--primary.align--right tr");
-            String change = row1.select("td.positive.not-fixed.table__cell:nth-of-type(2)").text();
-
-//  Previous day stock closing price is closing stock price minus the difference in stock (change)
-            Double doublePrevClosePrice = dValueOfClosingPrice - Double.parseDouble(change);
-            String prevClosePrice = Double.toString(doublePrevClosePrice);
-            summaryData.setPrevClosePrice(Utility.convertStringCurrency(Utility.isBlank(prevClosePrice) ? "0" : prevClosePrice));
+            String prevClosingPrice = row.select(".u-semi.table__cell").text().substring(1).trim();
+            summaryData.setPrevClosePrice(Utility.convertStringCurrency(Utility.isBlank(prevClosingPrice) ? "0" : prevClosingPrice));
 
 // Getting daily max and min stock string values
             String daysRangeMaxAndMin = list.select("li.kv__item:nth-of-type(2) > .kv__primary.kv__value").text();
@@ -95,11 +82,11 @@ public class MarketWatchScraper implements Scraper {
             String[] arrayOfDailySplit = daysRangeMaxAndMin.split("-");
 
 //Days range minimum value
-            String daysRangeMin = arrayOfDailySplit[0];
+            String daysRangeMin = arrayOfDailySplit[0].trim();
             summaryData.setDaysRangeMin(Utility.convertStringCurrency(Utility.isBlank(daysRangeMin) ? "0" : daysRangeMin));
 
 //Days range maximum value
-            String daysRangeMax = arrayOfDailySplit[1];
+            String daysRangeMax = arrayOfDailySplit[1].trim();
             summaryData.setDaysRangeMax(Utility.convertStringCurrency(Utility.isBlank(daysRangeMax) ? "0" : daysRangeMax));
 
 //Getting 52 week max and min stock value
@@ -109,16 +96,16 @@ public class MarketWatchScraper implements Scraper {
             String[] arrayOfFiftyTwoWeekSplit = fiftyTwoWeekRangeMaxAndMin.split("-");
 
 //Days range minimum value
-            String fiftyTwoWeeksMin = arrayOfFiftyTwoWeekSplit[0];
+            String fiftyTwoWeeksMin = arrayOfFiftyTwoWeekSplit[0].trim();
             summaryData.setFiftyTwoWeeksMin(Utility.convertStringCurrency(Utility.isBlank(fiftyTwoWeeksMin) ? "0" : fiftyTwoWeeksMin));
 
 //Days range maximum value
-            String fiftyTwoWeeksMax = arrayOfFiftyTwoWeekSplit[1];
+            String fiftyTwoWeeksMax = arrayOfFiftyTwoWeekSplit[1].trim();
             summaryData.setFiftyTwoWeeksMin(Utility.convertStringCurrency(Utility.isBlank(fiftyTwoWeeksMax) ? "0" : fiftyTwoWeeksMax));
 
 //Volume
             Elements div = document.select("div.range__details span");
-            String volume = div.select(".last-value.volume").text();
+            String volume = div.select("span.last-value.volume").text();
             summaryData.setVolume(Utility.convertStringCurrency(Utility.isBlank(volume) ? "0" : volume).longValue());
 
 //Average Volume
@@ -126,7 +113,7 @@ public class MarketWatchScraper implements Scraper {
             summaryData.setAvgVolume(Utility.convertStringCurrency(Utility.isBlank(avgVolume) ? "0" : avgVolume).longValue());
 
 //Market Cap
-            String marketCap = list.select("li.kv__item:nth-of-type(4) > .kv__primary.kv__value").text();
+            String marketCap = list.select("li.kv__item:nth-of-type(4) > .kv__primary.kv__value").text().substring(1).trim();
             summaryData.setMarketCap(Utility.convertStringCurrency(Utility.isBlank(marketCap) ? "0" : marketCap));
 
 //Beta Coefficient
@@ -135,14 +122,20 @@ public class MarketWatchScraper implements Scraper {
 
 //P/E Ratio
             String peRatio = list.select("li.kv__item:nth-of-type(9) > .kv__primary.kv__value").text();
+            if (peRatio.matches("[^0-9]+$")) {
+                 peRatio = "0";
+            }
             summaryData.setPeRatio(Utility.convertStringCurrency(Utility.isBlank(peRatio) ? "0" : peRatio));
 
 //EPS
-            String eps = list.select("li.kv__item:nth-of-type(10) > .kv__primary.kv__value").text();
+            String eps = list.select("li.kv__item:nth-of-type(10) > .kv__primary.kv__value").text().substring(1).trim();
             summaryData.setEps(Utility.convertStringCurrency(Utility.isBlank(eps) ? "0" : eps));
 //Dividend
 
-            String dividend = list.select("li.kv__item:nth-of-type(12) > .is-na.kv__primary.kv__value").text();
+            String dividend = list.select("li.kv__item:nth-of-type(12) > .kv__primary.kv__value").text().substring(1).trim();
+            if (dividend.matches("[^0-9]+$")) {
+                 dividend = "0";
+            }
             summaryData.setDividentYield(Utility.convertStringCurrency(Utility.isBlank(dividend) ? "0" : dividend));
 
 //EX-DIVIDEND DATE
@@ -151,8 +144,6 @@ public class MarketWatchScraper implements Scraper {
 
         } catch (IOException ex) {
             Logger.getLogger(StockReporter.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ParseException ex) {
-            Logger.getLogger(MarketWatchScraper.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

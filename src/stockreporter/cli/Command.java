@@ -1,7 +1,10 @@
 package stockreporter.cli;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import stockreporter.StockDao;
 import stockreporter.StockReporter;
 import stockreporter.daomodels.StockSummary;
@@ -138,6 +141,7 @@ public class Command {
     }
 
     public static void scrapeAllStocks() {
+    	Map<String, Scraper> scrapers = new HashMap<String, Scraper>();
         ScraperFactory scraperFactory = new ScraperFactory();
         logger.log(Level.INFO, "Get database instance");
         StockDao dao = StockDao.getInstance();
@@ -145,27 +149,35 @@ public class Command {
         if (USE_INVESTOPEDIA_SCRAPER) {
 
             Scraper investopediaScraper = scraperFactory.getScraper("INVESTOPEDIA");
-            logger.log(Level.INFO, "Scrap summary data for Investopedia...");
-            investopediaScraper.scrapeAllSummaryData();
+            scrapers.put("Investopedia", investopediaScraper);
+//            logger.log(Level.INFO, "Scrap summary data for Investopedia...");
+//            investopediaScraper.scrapeAllSummaryData();
 
         }
         if (USE_YAHOO_SCRAPER) {
             Scraper yahooScraper = scraperFactory.getScraper("YAHOO");
-            logger.log(Level.INFO, "Scrap summary data for Yahoo...");
-            yahooScraper.scrapeAllSummaryData();
+            scrapers.put("Yahoo", yahooScraper);
+//            logger.log(Level.INFO, "Scrap summary data for Yahoo...");
+//            yahooScraper.scrapeAllSummaryData();
 
         }
         if (USE_MARKETWATCH_SCRAPER) {
             Scraper marketWatchScraper = scraperFactory.getScraper("MARKETWATCH");
-            logger.log(Level.INFO, "Scrap summary data for MarketWatch...");
-            marketWatchScraper.scrapeAllSummaryData();
+            scrapers.put("MarketWatch", marketWatchScraper);
+//            logger.log(Level.INFO, "Scrap summary data for MarketWatch...");
+//            marketWatchScraper.scrapeAllSummaryData();
 
         }
         if (USE_FIDELITY_SCRAPER) {
             Scraper fidelityScraper = scraperFactory.getScraper("FIDELITY");
-            logger.log(Level.INFO, "Scrap summary data for Fidelity...");
-            fidelityScraper.scrapeAllSummaryData();
+            scrapers.put("Fidelity", fidelityScraper);
+//            logger.log(Level.INFO, "Scrap summary data for Fidelity...");
+//            fidelityScraper.scrapeAllSummaryData();
 
+        }
+        for(Map.Entry<String, Scraper> scraper:scrapers.entrySet()) {
+        	logger.log(Level.INFO, "Scrape summary data for %s", scraper.getKey());
+        	scraper.getValue().scrapeAllSummaryData();
         }
     }
 

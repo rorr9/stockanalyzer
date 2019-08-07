@@ -6,23 +6,25 @@
 package stockreporter.scrapers;
 
 import java.io.IOException;
-import stockreporter.daomodels.StockSummary;
-import stockreporter.daomodels.StockTicker;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
 import stockreporter.Constants;
-import stockreporter.StockDao;
 import stockreporter.StockReporter;
 import stockreporter.Utility;
 import stockreporter.daomodels.StockDateMap;
+import stockreporter.daomodels.StockSummary;
+import stockreporter.daomodels.StockTicker;
+import stockreporter.service.StockService;
 
 /**
  *
@@ -35,13 +37,13 @@ public class FidelityScraper implements Scraper {
      */
     private Document document;
     private StockSummary summaryData;
-    private StockDao dao;
+    private StockService stockService;
     private List<StockTicker> stockTickers;
     private boolean test = false;
 
-    public FidelityScraper() {
-        dao = StockDao.getInstance();
-        stockTickers = dao.getAllstockTickers();
+    public FidelityScraper(StockService stockService, List<StockTicker> stockTickers) {
+        this.stockService = stockService;
+        this.stockTickers = stockTickers;
     }
 
     /**

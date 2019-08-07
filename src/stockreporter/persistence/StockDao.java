@@ -1,18 +1,14 @@
 package stockreporter.persistence;
 
-import stockreporter.Constants;
-import stockreporter.daomodels.StockSummary;
-import stockreporter.daomodels.StockTicker;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,7 +17,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import stockreporter.Constants;
 import stockreporter.daomodels.StockDateMap;
+import stockreporter.daomodels.StockSummary;
+import stockreporter.daomodels.StockTicker;
 
 /**
  * This is the Data Access Layer (DAO) between database and business logic It
@@ -38,7 +37,6 @@ public final class StockDao {
 
     //For testing change the name to something like "stockreporter.test"
     // and drop the database after testing
-    private String dbName = "stockreporter.prod";
     private String url = "jdbc:sqlite:stockreporter.prod";
     private String BASE_SQL_FILE_PATH = "./resources/";
 

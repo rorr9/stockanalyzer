@@ -6,23 +6,24 @@
 package stockreporter.scrapers;
 
 import java.io.IOException;
-import java.text.NumberFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+
 import stockreporter.Constants;
 import stockreporter.StockReporter;
 import stockreporter.Utility;
 import stockreporter.daomodels.StockDateMap;
 import stockreporter.daomodels.StockSummary;
 import stockreporter.daomodels.StockTicker;
+import stockreporter.service.StockService;
 
 //Scraps MarketWatch Financial data
 public class MarketWatchScraper implements Scraper {
@@ -30,12 +31,13 @@ public class MarketWatchScraper implements Scraper {
     private boolean test = false;
     private Document document;
     private StockSummary summaryData;
+    private StockService stockService;
     private List<StockTicker> stockTickers;
 
     //Default constructor
-    public MarketWatchScraper() {
-        stockService = new StockServiceImpl();
-        stockTickers = stockServicev.getAllstockTickers();
+    public MarketWatchScraper(StockService stockService, List<StockTicker> stockTickers) {
+        this.stockService = stockService;
+        this.stockTickers = stockTickers;
     }
 
     @Override

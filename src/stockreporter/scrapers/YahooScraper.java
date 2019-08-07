@@ -4,24 +4,26 @@
 package stockreporter.scrapers;
 
 import java.io.IOException;
-
-import stockreporter.daomodels.StockSummary;
-import stockreporter.daomodels.StockTicker;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
 import stockreporter.Constants;
 import stockreporter.StockReporter;
 import stockreporter.Utility;
 import stockreporter.daomodels.StockDateMap;
+import stockreporter.daomodels.StockSummary;
+import stockreporter.daomodels.StockTicker;
+import stockreporter.service.StockService;
 
 /**
  * This class scrapes pages for each tracked stock ticker symbol from Yahoo
@@ -39,14 +41,14 @@ public class YahooScraper implements Scraper {
 
     private Document document;
     private StockSummary summaryData;
-    private StockDao dao;
+    private StockService stockService;
     private List<StockTicker> stockTickers;
 
     //Top-level object references
     //Default Constructor, will be refactored after ScraperFactory is implemented
-    public YahooScraper() {
-        dao = StockDao.getInstance();
-        stockTickers = dao.getAllstockTickers();
+    public YahooScraper(StockService stockService, List<StockTicker> stockTickers) {
+        this.stockService = stockService;
+        this.stockTickers = stockTickers;
     }
 
     /**

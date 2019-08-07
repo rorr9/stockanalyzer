@@ -97,11 +97,7 @@ public class Command {
         }
 
         ScraperFactory scraperFactory = new ScraperFactory();
-        //create scrapers
-        logger.log(Level.INFO, "Get database instance");
-        StockDao dao = StockDao.getInstance();
-
-        StockTicker ticker = StockDao.getInstance().getStockTickerByID(tickerID);
+        StockTicker ticker = stockService.getStockTickerByID(tickerID);
 
         if (USE_INVESTOPEDIA_SCRAPER) {
 
@@ -141,8 +137,6 @@ public class Command {
 
     public static void scrapeAllStocks() {
         ScraperFactory scraperFactory = new ScraperFactory();
-        logger.log(Level.INFO, "Get database instance");
-        StockDao dao = StockDao.getInstance();
 
         if (USE_INVESTOPEDIA_SCRAPER) {
 

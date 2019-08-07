@@ -1,9 +1,7 @@
 package stockreporter;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import stockreporter.scrapers.Scraper;
-import stockreporter.scrapers.ScraperFactory;
+
 import stockreporter.cli.Command;
 
 /**

@@ -54,7 +54,9 @@ public final class StockDao {
      * database with tables, views and indexes
      */
     public StockDao() {
-        if (databaseAlreadyInitialized()) {
+        Boolean isDatabaseInitialized = databaseAlreadyInitialized();
+        logger.log(Level.INFO, "Is database initialzed?: " + isDatabaseInitialized);
+        if (isDatabaseInitialized) {
             return;
         }
 
@@ -78,7 +80,6 @@ public final class StockDao {
             stmt = conn.createStatement();
             for (String str : sqlStrings) {
                 stmt.execute(str);
-                conn.commit();
             }
         } catch (SQLException e) {
             logger.log(Level.SEVERE, e.getMessage());
@@ -140,7 +141,7 @@ public final class StockDao {
         try {
             connect();
             DatabaseMetaData meta = conn.getMetaData();
-            rs = meta.getTables(null, null, "STOCK_TICKER", new String[]{"TABLE"});
+            rs = meta.getTables(null, null, Constants.TABLE_STOCK_TICKER, new String[]{"TABLE"});
             while (rs.next()) {
                 tableName = rs.getString("TABLE_NAME");
             }

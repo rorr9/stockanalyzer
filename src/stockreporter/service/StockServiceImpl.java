@@ -18,7 +18,6 @@ public class StockServiceImpl implements StockService {
 	@Override
 	public void setStockTickerData(String stockSymbol, String stockName) {
 		this.stockDao.setStockTickerData(stockSymbol, stockName);
-
 	}
 
 	@Override

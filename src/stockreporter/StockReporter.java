@@ -18,3 +18,4 @@ public class StockReporter {
         Command.parseParams(args);
     }
 }
+ 

@@ -62,10 +62,10 @@ public class FidelityScraper extends StockScraper {
             }
 
             StockDateMap stockDateMap = new StockDateMap();
-            stockDateMap.setSourceId(dao.getStockSourceIdByName(Constants.SCRAP_DATA_FROM_FIDELITY));
+            stockDateMap.setSourceId(stockService.getStockSourceIdByName(Constants.SCRAP_DATA_FROM_FIDELITY));
             stockDateMap.setTickerId(stockTicker.getId());
             stockDateMap.setDate(new SimpleDateFormat("MM-dd-yyyy").format(new Date()));
-            int last_inserted_id = dao.insertStockDateMap(stockDateMap);
+            int last_inserted_id = stockService.insertStockDateMap(stockDateMap);
         
             Element table1 = document.select("table").get(2);
             Elements rows = table1.select("tr");    
@@ -137,7 +137,7 @@ public class FidelityScraper extends StockScraper {
           
             String onYearTargetEst = null;//Fidelity does not provide this data on their website
            
-            dao.insertStockSummaryData(summaryData);
+            stockService.insertStockSummaryData(summaryData);
             
         } catch (IOException ex) {
             Logger.getLogger(StockReporter.class.getName()).log(Level.SEVERE, null, ex);

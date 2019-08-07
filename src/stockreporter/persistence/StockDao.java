@@ -1,5 +1,6 @@
-package stockreporter;
+package stockreporter.persistence;
 
+import stockreporter.Constants;
 import stockreporter.daomodels.StockSummary;
 import stockreporter.daomodels.StockTicker;
 

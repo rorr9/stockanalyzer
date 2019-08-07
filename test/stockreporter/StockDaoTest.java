@@ -8,6 +8,7 @@ package stockreporter;
 import java.math.BigDecimal;
 import org.junit.Assert;
 import org.junit.Test;
+import stockreporter.persistence.StockDao;
 import stockreporter.daomodels.StockSummary;
 import stockreporter.daomodels.StockDateMap;
 import static org.junit.Assert.assertNotNull;

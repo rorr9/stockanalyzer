@@ -5,7 +5,6 @@ package stockreporter.scrapers;
 
 import java.io.IOException;
 
-import stockreporter.StockDao;
 import stockreporter.daomodels.StockSummary;
 import stockreporter.daomodels.StockTicker;
 import java.text.SimpleDateFormat;
@@ -75,10 +74,10 @@ public class YahooScraper extends StockScraper {
             document = jsoupConn.referrer("http://www.google.com").timeout(1000 * 20).get();
 
             StockDateMap stockDateMap = new StockDateMap();
-            stockDateMap.setSourceId(dao.getStockSourceIdByName(Constants.SCRAP_DATA_FROM_YAHOO));
+            stockDateMap.setSourceId(stockService.getStockSourceIdByName(Constants.SCRAP_DATA_FROM_YAHOO));
             stockDateMap.setTickerId(stockTicker.getId());
             stockDateMap.setDate(new SimpleDateFormat("MM-dd-yyyy").format(new Date()));
-            int last_inserted_id = dao.insertStockDateMap(stockDateMap);
+            int last_inserted_id = stockService.insertStockDateMap(stockDateMap);
 
             summaryData = new StockSummary();
 
@@ -171,7 +170,7 @@ public class YahooScraper extends StockScraper {
                     }
                 }
             }
-            dao.insertStockSummaryData(summaryData);
+            stockService.insertStockSummaryData(summaryData);
 
         } catch (IOException ex) {
             //Generic log message for failed Jsoup connection

@@ -18,7 +18,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import stockreporter.Constants;
-import stockreporter.StockDao;
 import stockreporter.StockReporter;
 import stockreporter.Utility;
 import stockreporter.daomodels.StockDateMap;
@@ -26,19 +25,12 @@ import stockreporter.daomodels.StockSummary;
 import stockreporter.daomodels.StockTicker;
 
 //Scraps MarketWatch Financial data
-public class MarketWatchScraper implements Scraper {
+public class MarketWatchScraper extends StockScraper {
 
     private boolean test = false;
     private Document document;
     private StockSummary summaryData;
-    private StockDao dao;
     private List<StockTicker> stockTickers;
-
-    //Default constructor
-    public MarketWatchScraper() {
-        dao = StockDao.getInstance();
-        stockTickers = dao.getAllstockTickers();
-    }
 
     public void scrapeAllSummaryData() {
         for (StockTicker stockTicker : stockTickers) {
@@ -57,10 +49,10 @@ public class MarketWatchScraper implements Scraper {
             }
 
             StockDateMap stockDateMap = new StockDateMap();
-            stockDateMap.setSourceId(dao.getStockSourceIdByName(Constants.SCRAP_DATA_FROM_MARKETWATCH));
+            stockDateMap.setSourceId(stockService.getStockSourceIdByName(Constants.SCRAP_DATA_FROM_MARKETWATCH));
             stockDateMap.setTickerId(stockTicker.getId());
             stockDateMap.setDate(new SimpleDateFormat("MM-dd-yyyy").format(new Date()));
-            int last_inserted_id = dao.insertStockDateMap(stockDateMap);;
+            int last_inserted_id = stockService.insertStockDateMap(stockDateMap);;
             summaryData = new StockSummary();
             summaryData.setStockDtMapId(last_inserted_id);
 

@@ -2,11 +2,12 @@ package stockreporter.cli;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import stockreporter.StockDao;
 import stockreporter.StockReporter;
 import stockreporter.daomodels.StockTicker;
 import stockreporter.scrapers.Scraper;
 import stockreporter.scrapers.ScraperFactory;
+import stockreporter.service.StockService;
+import stockreporter.service.StockServiceImpl;
 
 /**
  * The Command class parses parameters passed in via the Command Line Interface
@@ -14,6 +15,7 @@ import stockreporter.scrapers.ScraperFactory;
  * scraping summary data for specific stocks.
  */
 public class Command {
+	private static StockService stockService = new StockServiceImpl();
 
     private static final Logger logger = Logger.getLogger(StockReporter.class.getName());
 
@@ -77,32 +79,29 @@ public class Command {
     }
 
     public static void addTicker(String symbol, String description) {
-        StockDao.getInstance().setStockTickerData(symbol, description);
+        stockService.setStockTickerData(symbol, description);
     }
 
     public static void removeTicker(String symbol) {
-        StockDao.getInstance().deleteFromStockTicker(symbol);
+        stockService.deleteFromStockTicker(symbol);
     }
 
     public static void getSummary(String symbol) {
 
-        int tickerID = StockDao.getInstance().getStockTickerBySymbol(symbol);
+        int tickerID = stockService.getStockTickerBySymbol(symbol);
         if (tickerID == 0) {
             System.out.println("Stock not in DB");
         }
 
         ScraperFactory scraperFactory = new ScraperFactory();
-        //create scrapers
-        logger.log(Level.INFO, "Get database instance");
-        StockDao dao = StockDao.getInstance();
         logger.log(Level.INFO, "Create scraper instances");
 
         Scraper investopediaScraper = scraperFactory.getScraper("INVESTOPEDIA");
         Scraper yahooScraper = scraperFactory.getScraper("YAHOO");
-        Scraper marketWatchScraper = scraperFactory.getScraper("MARKETWATCH");
+//        Scraper marketWatchScraper = scraperFactory.getScraper("MARKETWATCH");
         Scraper fidelityScraper = scraperFactory.getScraper("FIDELITY");
 
-        StockTicker ticker = StockDao.getInstance().getStockTickerByID(tickerID);
+        StockTicker ticker = stockService.getStockTickerByID(tickerID);
         logger.log(Level.INFO, "Scrap single summary data for Yahoo...");
         yahooScraper.scrapeSingleSummaryData(ticker);
         logger.log(Level.INFO, "Scrap single summary data for Investopedia...");
@@ -115,7 +114,7 @@ public class Command {
     }
 
     public static void getHistorical(String symbol) {
-        int tickerID = StockDao.getInstance().getStockTickerBySymbol(symbol);
+        int tickerID = stockService.getStockTickerBySymbol(symbol);
         if (tickerID == 0) {
             System.out.println("Stock not in DB");
         }
@@ -124,12 +123,11 @@ public class Command {
 
     public static void scrapeAllStocks() {
         ScraperFactory scraperFactory = new ScraperFactory();
-        logger.log(Level.INFO, "Get database instance");
-        StockDao dao = StockDao.getInstance();
+   
         logger.log(Level.INFO, "Create scraper instances");
         Scraper investopediaScraper = scraperFactory.getScraper("INVESTOPEDIA");
         Scraper yahooScraper = scraperFactory.getScraper("YAHOO");
-        Scraper marketWatchScraper = scraperFactory.getScraper("MARKETWATCH");
+//        Scraper marketWatchScraper = scraperFactory.getScraper("MARKETWATCH");
         Scraper fidelityScraper = scraperFactory.getScraper("FIDELITY");
 
         logger.log(Level.INFO, "Scrap summary data for Yahoo...");

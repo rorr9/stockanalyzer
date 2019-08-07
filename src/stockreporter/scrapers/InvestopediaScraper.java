@@ -61,11 +61,12 @@ public class InvestopediaScraper extends StockScraper {
             document = jsoupConn.referrer("http://www.google.com") .timeout(1000*10).get();
             }
             StockDateMap stockDateMap = new StockDateMap();
-            stockDateMap.setSourceId(dao.getStockSourceIdByName(Constants.SCRAP_DATA_FROM_INVESTOPEDIA));
+            stockDateMap.setSourceId(stockService.getStockSourceIdByName(Constants.SCRAP_DATA_FROM_INVESTOPEDIA));
             stockDateMap.setTickerId(stockTicker.getId());
             stockDateMap.setDate(new SimpleDateFormat("MM-dd-yyyy").format(new Date()));
-            int last_inserted_id = dao.insertStockDateMap(stockDateMap);
+            int last_inserted_id = stockService.insertStockDateMap(stockDateMap);
         
+            System.out.println(">>>>>> " + document.select("table"));
             Element table2 = document.select("table").get(2);
             Elements rows = table2.select("tr");    
             summaryData = new StockSummary();
@@ -119,7 +120,7 @@ public class InvestopediaScraper extends StockScraper {
             String eps = rows.get(rowNum).select("td").get(1).text();
             summaryData.setEps(Utility.convertStringCurrency(Utility.isBlank(eps)?"0":eps));
             
-            dao.insertStockSummaryData(summaryData);
+            stockService.insertStockSummaryData(summaryData);
         } catch (IOException ex) {
             Logger.getLogger(StockReporter.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -5,19 +5,19 @@
  */
 package stockreporter.scrapers;
 import java.util.List;
-import stockreporter.StockDao;
 import stockreporter.daomodels.StockTicker;
+import stockreporter.service.StockService;
+import stockreporter.service.StockServiceImpl;
 
 /**
  * Initialize stock scrapper with dao and stock tickers
  */
 public class StockScraper implements Scraper {
-    protected StockDao dao;
+    protected StockService stockService = new StockServiceImpl();
     protected List<StockTicker> stockTickers;
     
-    public StockScraper(){
-        dao = StockDao.getInstance();
-        stockTickers = dao.getAllstockTickers();
+    public StockScraper() {
+        stockTickers = this.stockService.getAllstockTickers();
     }
     
     public void scrapeAllSummaryData() {}

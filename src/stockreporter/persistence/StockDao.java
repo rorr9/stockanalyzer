@@ -38,8 +38,8 @@ public final class StockDao {
 
     //For testing change the name to something like "stockreporter.test"
     // and drop the database after testing
-    private String dbName = "stockreporter.test";
-    private String url = "jdbc:sqlite:stockreporter.test";
+    private String dbName = "stockreporter.prod";
+    private String url = "jdbc:sqlite:stockreporter.prod";
     private String BASE_SQL_FILE_PATH = "./resources/";
 
     private Collection<String> tableNames = Arrays.asList(
@@ -78,7 +78,7 @@ public final class StockDao {
             stmt = conn.createStatement();
             for (String str : sqlStrings) {
                 stmt.execute(str);
-//                conn.commit();
+                conn.commit();
             }
         } catch (SQLException e) {
             logger.log(Level.SEVERE, e.getMessage());

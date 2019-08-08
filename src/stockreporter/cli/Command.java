@@ -122,7 +122,7 @@ public class Command {
         Map<String, Scraper> scrapers = chooseScrapers();
         
         for (Map.Entry<String, Scraper> scraper:scrapers.entrySet()) {
-        	logger.log(Level.INFO, "Scrap single summary data for %s...", scraper.getKey());
+        	logger.log(Level.INFO, "Scrape single summary data for %s...", scraper.getKey());
         	scraper.getValue().scrapeSingleSummaryData(ticker);
         	printSummary(scraper.getKey(), symbol, scraper.getValue().getSummaryData());
         }
@@ -140,7 +140,7 @@ public class Command {
     	Map<String, Scraper> scrapers = chooseScrapers();
         
         for (Map.Entry<String, Scraper> scraper:scrapers.entrySet()) {
-        	logger.log(Level.INFO, "Scrap single summary data for %s...", scraper.getKey());
+        	logger.log(Level.INFO, "Scrape single summary data for %s...", scraper.getKey());
         	scraper.getValue().scrapeAllSummaryData();
         }
     }

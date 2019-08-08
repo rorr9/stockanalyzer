@@ -7,6 +7,7 @@ package stockreporter.scrapers;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -31,6 +32,7 @@ public class MarketWatchScraper implements Scraper {
     private boolean test = false;
     private Document document;
     private StockSummary summaryData;
+    private List<StockSummary> summaryDataList;
     private StockService stockService;
     private List<StockTicker> stockTickers;
 
@@ -42,8 +44,10 @@ public class MarketWatchScraper implements Scraper {
 
     @Override
     public void scrapeAllSummaryData() {
+        summaryDataList = new ArrayList<StockSummary>();
         for (StockTicker stockTicker : stockTickers) {
             scrapeSingleSummaryData(stockTicker);
+            summaryDataList.add(summaryData);
         }
     }
 
@@ -123,7 +127,7 @@ public class MarketWatchScraper implements Scraper {
 //P/E Ratio
             String peRatio = list.select("li.kv__item:nth-of-type(9) > .kv__primary.kv__value").text();
             if (peRatio.matches("[^0-9]+$")) {
-                 peRatio = "0";
+                peRatio = "0";
             }
             summaryData.setPeRatio(Utility.convertStringCurrency(Utility.isBlank(peRatio) ? "0" : peRatio));
 
@@ -134,7 +138,7 @@ public class MarketWatchScraper implements Scraper {
 
             String dividend = list.select("li.kv__item:nth-of-type(12) > .kv__primary.kv__value").text().substring(1).trim();
             if (dividend.matches("[^0-9]+$")) {
-                 dividend = "0";
+                dividend = "0";
             }
             summaryData.setDividentYield(Utility.convertStringCurrency(Utility.isBlank(dividend) ? "0" : dividend));
 
@@ -151,4 +155,7 @@ public class MarketWatchScraper implements Scraper {
         return summaryData;
     }
 
+    public List<StockSummary> getAllSummaryData() {
+        return summaryDataList;
+    }
 }

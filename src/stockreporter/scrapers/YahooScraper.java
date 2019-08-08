@@ -5,6 +5,7 @@ package stockreporter.scrapers;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,7 @@ public class YahooScraper implements Scraper {
 
     private Document document;
     private StockSummary summaryData;
+    private List<StockSummary> summaryDataList;
     private StockService stockService;
     private List<StockTicker> stockTickers;
 
@@ -57,8 +59,11 @@ public class YahooScraper implements Scraper {
      */
     @Override
     public void scrapeAllSummaryData() {
+        summaryDataList = new ArrayList<StockSummary>();
         for (StockTicker stockTicker : stockTickers) {
+
             scrapeSingleSummaryData(stockTicker);
+            summaryDataList.add(summaryData);
         }
     }
 
@@ -189,5 +194,9 @@ public class YahooScraper implements Scraper {
 
     public StockSummary getSummaryData() {
         return summaryData;
+    }
+
+    public List<StockSummary> getAllSummaryData() {
+        return summaryDataList;
     }
 }

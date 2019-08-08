@@ -1,5 +1,6 @@
 package stockreporter.cli;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import stockreporter.StockReporter;
@@ -16,7 +17,8 @@ import stockreporter.service.StockServiceImpl;
  * scraping summary data for specific stocks.
  */
 public class Command {
-	private static StockService stockService = new StockServiceImpl();
+
+    private static StockService stockService = new StockServiceImpl();
 
     public static final boolean USE_INVESTOPEDIA_SCRAPER = false, USE_MARKETWATCH_SCRAPER = true, USE_YAHOO_SCRAPER = true, USE_FIDELITY_SCRAPER = true;
 
@@ -89,6 +91,10 @@ public class Command {
         stockService.deleteFromStockTicker(symbol);
     }
 
+    public static List<StockTicker> getTickers() {
+        return stockService.getAllstockTickers();
+    }
+
     public static void getSummary(String symbol) {
 
         int tickerID = stockService.getStockTickerBySymbol(symbol);
@@ -132,7 +138,7 @@ public class Command {
         if (tickerID == 0) {
             System.out.println("Stock not in DB");
         }
-        //TO:DO
+        //TO:DO when historical data gets implemented
     }
 
     public static void scrapeAllStocks() {
@@ -144,11 +150,19 @@ public class Command {
             logger.log(Level.INFO, "Scrap summary data for Investopedia...");
             investopediaScraper.scrapeAllSummaryData();
 
+            for (int i = 0; i < investopediaScraper.getAllSummaryData().size(); i++) {
+                printSummary("Investopedia", getTickers().get(i).getSymbol(), investopediaScraper.getAllSummaryData().get(i));
+            }
+
         }
         if (USE_YAHOO_SCRAPER) {
             Scraper yahooScraper = scraperFactory.getScraper("YAHOO");
             logger.log(Level.INFO, "Scrap summary data for Yahoo...");
             yahooScraper.scrapeAllSummaryData();
+
+            for (int i = 0; i < yahooScraper.getAllSummaryData().size(); i++) {
+                printSummary("Investopedia", getTickers().get(i).getSymbol(), yahooScraper.getAllSummaryData().get(i));
+            }
 
         }
         if (USE_MARKETWATCH_SCRAPER) {
@@ -156,11 +170,19 @@ public class Command {
             logger.log(Level.INFO, "Scrap summary data for MarketWatch...");
             marketWatchScraper.scrapeAllSummaryData();
 
+            for (int i = 0; i < marketWatchScraper.getAllSummaryData().size(); i++) {
+                printSummary("Investopedia", getTickers().get(i).getSymbol(), marketWatchScraper.getAllSummaryData().get(i));
+            }
+
         }
         if (USE_FIDELITY_SCRAPER) {
             Scraper fidelityScraper = scraperFactory.getScraper("FIDELITY");
             logger.log(Level.INFO, "Scrap summary data for Fidelity...");
             fidelityScraper.scrapeAllSummaryData();
+
+            for (int i = 0; i < fidelityScraper.getAllSummaryData().size(); i++) {
+                printSummary("Investopedia", getTickers().get(i).getSymbol(), fidelityScraper.getAllSummaryData().get(i));
+            }
 
         }
     }

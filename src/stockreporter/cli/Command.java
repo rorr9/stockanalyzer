@@ -1,6 +1,8 @@
 package stockreporter.cli;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import stockreporter.StockReporter;
@@ -91,6 +93,26 @@ public class Command {
         stockService.deleteFromStockTicker(symbol);
     }
 
+    private static Map<String, Scraper> chooseScrapers() {
+        ScraperFactory scraperFactory = new ScraperFactory();
+        Map<String, Scraper> scrapers = new HashMap<String, Scraper>();
+
+        if (USE_INVESTOPEDIA_SCRAPER) {
+            scrapers.put("Investopedia", scraperFactory.getScraper("INVESTOPEDIA"));
+        }
+        if (USE_YAHOO_SCRAPER) {
+            scrapers.put("Yahoo", scraperFactory.getScraper("YAHOO"));
+        }
+        if (USE_MARKETWATCH_SCRAPER) {
+            scrapers.put("MarketWatch", scraperFactory.getScraper("MARKETWATCH"));
+        }
+        if (USE_FIDELITY_SCRAPER) {
+            scrapers.put("Fidelity", scraperFactory.getScraper("FIDELITY"));
+        }
+
+        return scrapers;
+    }
+
     public static List<StockTicker> getTickers() {
         return stockService.getAllstockTickers();
     }
@@ -102,35 +124,14 @@ public class Command {
             System.out.println("Stock not in DB");
         }
 
-        ScraperFactory scraperFactory = new ScraperFactory();
         StockTicker ticker = stockService.getStockTickerByID(tickerID);
+        Map<String, Scraper> scrapers = chooseScrapers();
 
-        if (USE_INVESTOPEDIA_SCRAPER) {
-
-            Scraper investopediaScraper = scraperFactory.getScraper("INVESTOPEDIA");
-            logger.log(Level.INFO, "Scrap single summary data for Investopedia...");
-            investopediaScraper.scrapeSingleSummaryData(ticker);
-            printSummary("Investopedia", symbol, investopediaScraper.getSummaryData());
+        for (Map.Entry<String, Scraper> scraper : scrapers.entrySet()) {
+            logger.log(Level.INFO, "Scrape single summary data for %s...", scraper.getKey());
+            scraper.getValue().scrapeSingleSummaryData(ticker);
+            printSummary(scraper.getKey(), symbol, scraper.getValue().getSummaryData());
         }
-        if (USE_YAHOO_SCRAPER) {
-            Scraper yahooScraper = scraperFactory.getScraper("YAHOO");
-            logger.log(Level.INFO, "Scrap single summary data for Yahoo...");
-            yahooScraper.scrapeSingleSummaryData(ticker);
-            printSummary("Yahoo", symbol, yahooScraper.getSummaryData());
-        }
-        if (USE_MARKETWATCH_SCRAPER) {
-            Scraper marketWatchScraper = scraperFactory.getScraper("MARKETWATCH");
-            logger.log(Level.INFO, "Scrap single summary data for MarketWatch...");
-            marketWatchScraper.scrapeSingleSummaryData(ticker);
-            printSummary("MarketWatch", symbol, marketWatchScraper.getSummaryData());
-        }
-        if (USE_FIDELITY_SCRAPER) {
-            Scraper fidelityScraper = scraperFactory.getScraper("FIDELITY");
-            logger.log(Level.INFO, "Scrap single summary data for Fidelity...");
-            fidelityScraper.scrapeSingleSummaryData(ticker);
-            printSummary("Fidelity", symbol, fidelityScraper.getSummaryData());
-        }
-
     }
 
     public static void getHistorical(String symbol) {
@@ -142,46 +143,16 @@ public class Command {
     }
 
     public static void scrapeAllStocks() {
-        ScraperFactory scraperFactory = new ScraperFactory();
 
-        if (USE_INVESTOPEDIA_SCRAPER) {
+        Map<String, Scraper> scrapers = chooseScrapers();
 
-            Scraper investopediaScraper = scraperFactory.getScraper("INVESTOPEDIA");
-            logger.log(Level.INFO, "Scrap summary data for Investopedia...");
-            investopediaScraper.scrapeAllSummaryData();
+        for (Map.Entry<String, Scraper> scraper : scrapers.entrySet()) {
 
-            for (int i = 0; i < investopediaScraper.getAllSummaryData().size(); i++) {
-                printSummary("Investopedia", getTickers().get(i).getSymbol(), investopediaScraper.getAllSummaryData().get(i));
-            }
+            logger.log(Level.INFO, "Scrape single summary data for %s...", scraper.getKey());
+            scraper.getValue().scrapeAllSummaryData();
 
-        }
-        if (USE_YAHOO_SCRAPER) {
-            Scraper yahooScraper = scraperFactory.getScraper("YAHOO");
-            logger.log(Level.INFO, "Scrap summary data for Yahoo...");
-            yahooScraper.scrapeAllSummaryData();
-
-            for (int i = 0; i < yahooScraper.getAllSummaryData().size(); i++) {
-                printSummary("Investopedia", getTickers().get(i).getSymbol(), yahooScraper.getAllSummaryData().get(i));
-            }
-
-        }
-        if (USE_MARKETWATCH_SCRAPER) {
-            Scraper marketWatchScraper = scraperFactory.getScraper("MARKETWATCH");
-            logger.log(Level.INFO, "Scrap summary data for MarketWatch...");
-            marketWatchScraper.scrapeAllSummaryData();
-
-            for (int i = 0; i < marketWatchScraper.getAllSummaryData().size(); i++) {
-                printSummary("Investopedia", getTickers().get(i).getSymbol(), marketWatchScraper.getAllSummaryData().get(i));
-            }
-
-        }
-        if (USE_FIDELITY_SCRAPER) {
-            Scraper fidelityScraper = scraperFactory.getScraper("FIDELITY");
-            logger.log(Level.INFO, "Scrap summary data for Fidelity...");
-            fidelityScraper.scrapeAllSummaryData();
-
-            for (int i = 0; i < fidelityScraper.getAllSummaryData().size(); i++) {
-                printSummary("Investopedia", getTickers().get(i).getSymbol(), fidelityScraper.getAllSummaryData().get(i));
+            for (int i = 0; i < scraper.getValue().getAllSummaryData().size(); i++) {
+                printSummary(scraper.getKey(), getTickers().get(i).getSymbol(), scraper.getValue().getAllSummaryData().get(i));
             }
 
         }

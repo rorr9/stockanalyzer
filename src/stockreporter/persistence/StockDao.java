@@ -37,6 +37,7 @@ public final class StockDao {
 
     //For testing change the name to something like "stockreporter.test"
     // and drop the database after testing
+    private String dbName = "stockreporter.prod";
     private String url = "jdbc:sqlite:stockreporter.prod";
     private String BASE_SQL_FILE_PATH = "./resources/";
 
